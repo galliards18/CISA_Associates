@@ -1,7 +1,5 @@
 <?php
 session_start();
-
-// Set PHP timezone
 date_default_timezone_set('Asia/Kolkata'); // Adjust as per your timezone
 
 // Check if user is logged in and is an admin
@@ -10,7 +8,6 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
     exit();
 }
 
-// Include database connection
 require '../config.php';
 
 // Sanitize input function
@@ -23,6 +20,8 @@ function sanitize_input($data) {
 
 // Initialize variables
 $date = '';
+$department = '';
+$section = '';
 $whereClause = '';
 $searchMessage = '';
 
@@ -30,36 +29,73 @@ $searchMessage = '';
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['date'])) {
         $date = sanitize_input($_POST['date']);
+    }
+    if (isset($_POST['department'])) {
+        $department = sanitize_input($_POST['department']);
+    }
+    if (isset($_POST['section'])) {
+        $section = sanitize_input($_POST['section']);
+    }
 
-        // Validate date format
+    // Build WHERE clause based on filters
+    $conditions = [];
+    if ($date) {
+        $conditions[] = "DATE(f.attendance_date) = ?";
+    }
+    if ($department) {
+        $conditions[] = "e.department = ?";
+    }
+    if ($section) {
+        $conditions[] = "e.section = ?";
+    }
+
+    if (count($conditions) > 0) {
+        $whereClause = "WHERE " . implode(" AND ", $conditions);
+        $searchMessage = "Showing results";
         if ($date) {
-            $whereClause = "WHERE DATE(f.attendance_date) = ?";
-            $searchMessage = "Showing results for date: $date";
+            $searchMessage .= " for date: $date";
+        }
+        if ($department) {
+            $searchMessage .= " and department: $department";
+        }
+        if ($section) {
+            $searchMessage .= " and section: $section";
         }
     }
 }
 
-// SQL query with date filter
-$sql = "SELECT e.first_name, e.last_name, DATE(f.attendance_date) AS attendance_date, f.attendance_status, ft.flag_type
-        FROM employee_registration e
-        INNER JOIN employee_attendance_flag f ON e.employee_id = f.employee_id
+// SQL query with filters
+$sql = "SELECT e.first_name, e.last_name, e.department, e.section, DATE(f.attendance_date) AS attendance_date, f.attendance_status, ft.flag_type
+        FROM student_registration e
+        INNER JOIN student_attendance_flag f ON e.student_id = f.student_id
         INNER JOIN flag_type ft ON f.flag_id = ft.flag_id
         $whereClause
         ORDER BY f.attendance_date DESC";
 
-
-
 $stmt = $conn->prepare($sql);
 
-if ($whereClause) {
-    $stmt->bind_param("s", $date);
+$types = '';
+$params = [];
+if ($date) {
+    $types .= 's'; // Add type specifier for date
+    $params[] = $date;
+}
+if ($department) {
+    $types .= 's'; // Add type specifier for department
+    $params[] = $department;
+}
+if ($section) {
+    $types .= 's'; // Add type specifier for section
+    $params[] = $section;
+}
+
+if ($types) {
+    $stmt->bind_param($types, ...$params);
 }
 
 $stmt->execute();
 $result = $stmt->get_result();
 ?>
-
-
 <!DOCTYPE html>
 <html lang="en" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../../assets/" data-template="vertical-menu-template-free">
 <head>
@@ -191,6 +227,10 @@ $result = $stmt->get_result();
       .custom-outline-button:focus {
           outline: none; /* Remove default focus outline */
           box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Custom focus effect */
+      }
+
+      .nowrap {
+        white-space: nowrap;
       }
     </style>
   </head>
@@ -362,14 +402,32 @@ $result = $stmt->get_result();
             <!-- Content -->
             <div class="container-xxl flex-grow-1 container-p-y">
               <!-- Search Form -->
-              <div class="row mb-3">
-                <div class="col-lg-12">
-                  <form method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>" class="d-flex">
-                    <input type="date" name="date" id="date" class="form-control me-2" aria-label="Search" value="<?php echo htmlspecialchars($date); ?>">
-                    <button type="submit" class="custom-outline-button">Search</button>
-                  </form>
-                </div>
-              </div>
+              <form method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>" class="d-flex mb-3">
+                <input type="date" name="date" id="date" class="form-control me-2" aria-label="Search" value="<?php echo htmlspecialchars($date); ?>">
+                <select name="department" id="department" class="form-control me-2">
+                    <option value="">Select Department</option>
+                    <?php
+                    $departmentQuery = "SELECT DISTINCT department FROM student_registration WHERE department != 'admin'";
+                    $departmentResult = $conn->query($departmentQuery);
+                    while ($dept = $departmentResult->fetch_assoc()) {
+                        $selected = ($department === $dept['department']) ? 'selected' : '';
+                        echo "<option value=\"" . htmlspecialchars($dept['department']) . "\" $selected>" . htmlspecialchars($dept['department']) . "</option>";
+                    }
+                    ?>
+                </select>
+                <select name="section" id="section" class="form-control me-2">
+                    <option value="">Select Section</option>
+                    <?php
+                    $sectionQuery = "SELECT DISTINCT section FROM student_registration";
+                    $sectionResult = $conn->query($sectionQuery);
+                    while ($sec = $sectionResult->fetch_assoc()) {
+                        $selected = ($section === $sec['section']) ? 'selected' : '';
+                        echo "<option value=\"" . htmlspecialchars($sec['section']) . "\" $selected>" . htmlspecialchars($sec['section']) . "</option>";
+                    }
+                    ?>
+                </select>
+                <button type="submit" class="custom-outline-button">Search</button>
+              </form>
               <!-- Search Form -->
               <div class="row">
                 <div class="col-lg-12 mb-4 order-0">
@@ -389,50 +447,53 @@ $result = $stmt->get_result();
                                 <div class=" mt-2">
                                   <div class="table-responsive mt-2">
                                     <table class="table table-bordered">
-                                      <thead>
-                                          <tr>
-                                              <th>#</th>
-                                              <th>Employee Name</th>
-                                              <th>Attendance Date</th>
-                                              <th>Status</th>
-                                              <th>Flag Ceremony Type</th>
-                                          </tr>
-                                      </thead>
-                                      <tbody>
-                                          <?php
-                                          $index = 1;
-                                          while ($row = $result->fetch_assoc()) {
-                                              // Determine the row color based on attendance status
-                                              $rowColor = '';
-                                              switch (strtolower($row['attendance_status'])) {
-                                                  case 'present':
-                                                      $rowColor = 'bg-success text-white'; // Green for present
-                                                      break;
-                                                  case 'absent':
-                                                      $rowColor = 'bg-danger text-white'; // Red for absent
-                                                      break;
-                                                  case 'late':
-                                                      $rowColor = 'bg-warning text-dark'; // Orange for late
-                                                      break;
-                                                  case 'no record':
-                                                      $rowColor = 'bg-primary text-white'; // Blue for no record
-                                                      break;
-                                                  default:
-                                                      $rowColor = ''; // Default color if no match
-                                                      break;
-                                              }
-                                              ?>
-                                              <tr class="<?php echo $rowColor; ?>">
-                                                  <td><?php echo $index++; ?></td>
-                                                  <td><?php echo htmlspecialchars($row['first_name'] . ' ' . $row['last_name']); ?></td>
-                                                  <td><?php echo htmlspecialchars($row['attendance_date']); ?></td>
-                                                  <td><?php echo ucfirst(htmlspecialchars($row['attendance_status'])); ?></td>
-                                                  <td><?php echo ucfirst(htmlspecialchars($row['flag_type'])); ?></td>
-                                              </tr>
-                                              <?php
+                                    <thead>
+                                      <tr>
+                                        <th>#</th>
+                                        <th>Student Name</th>
+                                        <th>Attendance Date</th>
+                                        <th>Status</th>
+                                        <th>Department</th>
+                                        <th>Section</th>
+                                        <th>Flag Ceremony Type</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <?php
+                                      $index = 1;
+                                      while ($row = $result->fetch_assoc()) {
+                                          $rowColor = '';
+                                          switch (strtolower($row['attendance_status'])) {
+                                              case 'present':
+                                                  $rowColor = 'bg-success text-white';
+                                                  break;
+                                              case 'absent':
+                                                  $rowColor = 'bg-danger text-white';
+                                                  break;
+                                              case 'late':
+                                                  $rowColor = 'bg-warning text-dark';
+                                                  break;
+                                              case 'no record':
+                                                  $rowColor = 'bg-primary text-white';
+                                                  break;
+                                              default:
+                                                  $rowColor = '';
+                                                  break;
                                           }
                                           ?>
-                                      </tbody>
+                                          <tr class="<?php echo $rowColor; ?>">
+                                            <td><?php echo $index++; ?></td>
+                                            <td class="nowrap"><?php echo htmlspecialchars($row['first_name'] . ' ' . $row['last_name']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['attendance_date']); ?></td>
+                                            <td><?php echo ucfirst(htmlspecialchars($row['attendance_status'])); ?></td>
+                                            <td class="nowrap"><?php echo htmlspecialchars($row['department']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['section']); ?></td>
+                                            <td class="nowrap"><?php echo ucfirst(htmlspecialchars($row['flag_type'])); ?></td>
+                                          </tr>
+                                          <?php
+                                      }
+                                      ?>
+                                    </tbody>
                                   </table>
                                   </div>
                                   <!-- After the table in your existing code -->
