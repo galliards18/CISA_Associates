@@ -219,8 +219,8 @@ $result = $stmt->get_result();
                         </a>
                         <ul class="menu-sub">
                             <li class="menu-item">
-                              <a href="admin_profile.php" class="menu-link">
-                                <div data-i18n="Analytics">Profile</div>
+                              <a href="student.php" class="menu-link">
+                                <div data-i18n="Analytics">Student</div>
                               </a>
                             </li>
                             <li class="menu-item">
@@ -381,12 +381,12 @@ $result = $stmt->get_result();
                         <table class="table table-bordered table-striped">
                           <thead>
                             <tr>
-                              <th>Action</th>
+                              <th>Status</th>
                               <th>Mark In</th>
                               <th>Mark Out</th>
-                              <th>First Name</th>
                               <th>Last Name</th>
-                              <th>Status</th>
+                              <th>First Name</th>
+                              <th>Action</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -394,7 +394,26 @@ $result = $stmt->get_result();
                               if ($result->num_rows > 0) {
                                   while ($row = $result->fetch_assoc()) {
                                       echo "<tr>";
-                                      echo "<td><a href='employee_attendance_information_gate.php?employee_id=" . $row['employee_id'] . "'><i class='menu-icon tf-icons bx bx-show'></i></a></td>";
+                                      // Status column
+                                      $sql_status = "SELECT attendance_status FROM employee_attendance_gate WHERE employee_id = ? ORDER BY entry_time DESC LIMIT 1";
+                                      $stmt_status = $conn->prepare($sql_status);
+                                      $stmt_status->bind_param("i", $row["employee_id"]);
+                                      $stmt_status->execute();
+                                      $result_status = $stmt_status->get_result();
+                                      if ($result_status->num_rows > 0) {
+                                          $status_row = $result_status->fetch_assoc();
+                                          echo '<td class="status-icon">';
+                                          if ($status_row['attendance_status'] == '0') {
+                                              echo "<td>Not Marked from the System</td>";
+                                          } elseif ($status_row['attendance_status'] == '1') {
+                                              echo '<i class="fas fa-check-circle status-icon-checked"></i>';
+                                          } elseif ($status_row['attendance_status'] == '2') {
+                                              echo '<i class="fas fa-times-circle status-icon-wrong"></i>';
+                                          }
+                                          echo '</td>';
+                                      } else {
+                                          echo "<td>Not Marked from the System</td>";
+                                      }
                                       
                                       // Mark In column
                                       echo '<td class="mark-column">
@@ -421,30 +440,9 @@ $result = $stmt->get_result();
                                                   </button>
                                               </form>
                                           </td>';
-
-                                      echo "<td>" . $row["first_name"] . "</td>";
                                       echo "<td>" . $row["last_name"] . "</td>";
-
-                                      // Status column
-                                      $sql_status = "SELECT attendance_status FROM employee_attendance_gate WHERE employee_id = ? ORDER BY entry_time DESC LIMIT 1";
-                                      $stmt_status = $conn->prepare($sql_status);
-                                      $stmt_status->bind_param("i", $row["employee_id"]);
-                                      $stmt_status->execute();
-                                      $result_status = $stmt_status->get_result();
-                                      if ($result_status->num_rows > 0) {
-                                          $status_row = $result_status->fetch_assoc();
-                                          echo '<td class="status-icon">';
-                                          if ($status_row['attendance_status'] == '0') {
-                                              echo "<td>Not Marked from the System</td>";
-                                          } elseif ($status_row['attendance_status'] == '1') {
-                                              echo '<i class="fas fa-check-circle status-icon-checked"></i>';
-                                          } elseif ($status_row['attendance_status'] == '2') {
-                                              echo '<i class="fas fa-times-circle status-icon-wrong"></i>';
-                                          }
-                                          echo '</td>';
-                                      } else {
-                                          echo "<td>Not Marked from the System</td>";
-                                      }
+                                      echo "<td>" . $row["first_name"] . "</td>";
+                                      echo "<td><a href='employee_attendance_information_gate.php?employee_id=" . $row['employee_id'] . "'><i class='menu-icon tf-icons bx bx-show'></i></a></td>";
                                       echo "</tr>";
                                   }
                               } else {

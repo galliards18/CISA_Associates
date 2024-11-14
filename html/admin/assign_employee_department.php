@@ -62,11 +62,19 @@ if (isset($_GET['employee_id'])) {
     exit(); // Stop further execution after assigning or error
 }
 
-// Fetch all non-admin employees
-$sql = "SELECT * FROM employee_registration WHERE is_admin = 0";
-$result = $conn->query($sql);
+// Check if there is a search term
+$search = isset($_GET['search']) ? $_GET['search'] : '';
 
+// Modify SQL to filter based on search term
+$sql = "SELECT * FROM employee_registration WHERE is_admin = 0 AND (first_name LIKE ? OR last_name LIKE ? OR email LIKE ?)";
+$stmt = $conn->prepare($sql);
+$search_term = "%$search%";
+$stmt->bind_param("sss", $search_term, $search_term, $search_term);
+$stmt->execute();
+$result = $stmt->get_result();
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="en" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../../assets/" data-template="vertical-menu-template-free">
@@ -307,8 +315,8 @@ $result = $conn->query($sql);
                         </a>
                         <ul class="menu-sub">
                             <li class="menu-item">
-                                <a href="admin_profile.php" class="menu-link">
-                                    <div data-i18n="Analytics">Profile</div>
+                                <a href="student.php" class="menu-link">
+                                    <div data-i18n="Analytics">Student</div>
                                 </a>
                             </li>
                             <li class="menu-item">
@@ -436,9 +444,13 @@ $result = $conn->query($sql);
                 <div class="content-wrapper">
                     <!-- Content -->
                     <div class="container-xxl flex-grow-1 container-p-y">
-                        <div class="col-md-12">
-                            <input type="text" id="searchInput" class="form-control mb-3" placeholder="Search...">
-                        </div>
+                        <div class="row mb-3">
+                            <div class="col-lg-12">
+                              <form class="d-flex" method="GET" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+                                <input class="form-control me-2" type="search" id="searchInput" placeholder="Search by Name" aria-label="Search" name="search" value="<?php echo htmlspecialchars($search); ?>">
+                              </form>
+                            </div>
+                          </div>
                         <div class="row">
                             <div class="col-lg-12 mb-4 order-0">
                                 <div class="card">
@@ -466,7 +478,7 @@ $result = $conn->query($sql);
                                                     while ($row = $result->fetch_assoc()) {
                                                         echo "<tr>";
                                                         echo "<td>{$counter}</td>";
-                                                        echo "<td>"; // Moved Action buttons here
+                                                        echo "<td class='text-nowrap'>";
                                                         if ($row['is_assigned_department'] == 0) {
                                                             echo "<button class='btn btn-primary assign-button' data-employee-id='{$row['employee_id']}'>Assign for Attendance</button>";
                                                         } else {

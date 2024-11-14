@@ -11,14 +11,15 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
 require '../config.php';
 
 // Initialize variables
-$employee_id = $firstname = $lastname = $email = $password = $phone_number = $department = $position = '';
-$is_admin = $hire_date = $address = $city = $postal_code = $country = $date_of_birth = $gender = '';
+$student_id = $firstname = $lastname = $email = $password = $phone_number = $department = $year_level = $section = '';
+$enrollment_date = $address = $city = $postal_code = $country = $date_of_birth = $gender = '';
 $emergency_contact_name = $emergency_contact_number = '';
 
-$id = $_GET['employee_id']; // Get employee ID from URL
+// Get student ID from URL
+$id = $_GET['student_id'];
 
-// Retrieve employee details from database using prepared statement
-$sql = "SELECT * FROM employee_registration WHERE employee_id = ?";
+// Retrieve student details from database using prepared statement
+$sql = "SELECT * FROM student_registration WHERE student_id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $id);
 $stmt->execute();
@@ -26,15 +27,15 @@ $result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
-    $employee_id = $row['employee_id'];
+    $student_id = $row['student_id'];
     $firstname = $row['first_name'];
     $lastname = $row['last_name'];
     $email = $row['email'];
     $phone_number = $row['phone_number'];
     $department = $row['department'];
-    $position = $row['position'];
-    $is_admin = $row['is_admin'];
-    $hire_date = $row['hire_date'];
+    $year_level = $row['year_level'];
+    $section = $row['section'];
+    $enrollment_date = $row['enrollment_date'];
     $address = $row['address'];
     $city = $row['city'];
     $postal_code = $row['postal_code'];
@@ -44,13 +45,14 @@ if ($result->num_rows > 0) {
     $emergency_contact_name = $row['emergency_contact_name'];
     $emergency_contact_number = $row['emergency_contact_number'];
 } else {
-    echo "Employee not found";
+    echo "Student not found";
     exit(); // Stop further execution
 }
 
 $stmt->close();
 $conn->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../../assets/" data-template="vertical-menu-template-free">
@@ -223,9 +225,9 @@ $conn->close();
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="container">
-                                    <h2 class="my-4">Edit Employee</h2>
-                                    <form action="update_employee.php" method="POST">
-                                        <input type="hidden" name="employee_id" value="<?php echo $employee_id; ?>">
+                                    <h2 class="my-4">Edit Student</h2>
+                                    <form action="update_student.php" method="POST">
+                                        <input type="hidden" name="student_id" value="<?php echo $student_id; ?>">
                                         
                                         <div class="form-group row mb-3">
                                             <label for="firstname" class="col-sm-2 col-form-label">First Name</label>
@@ -263,26 +265,23 @@ $conn->close();
                                         </div>
 
                                         <div class="form-group row mb-3">
-                                            <label for="position" class="col-sm-2 col-form-label">Position</label>
+                                            <label for="year_level" class="col-sm-2 col-form-label">Year Level</label>
                                             <div class="col-sm-10">
-                                                <input type="text" class="form-control" id="position" name="position" value="<?php echo htmlspecialchars($position); ?>">
+                                                <input type="number" class="form-control" id="year_level" name="year_level" value="<?php echo htmlspecialchars($year_level); ?>">
                                             </div>
                                         </div>
 
                                         <div class="form-group row mb-3">
-                                            <label for="is_admin" class="col-sm-2 col-form-label">Is Admin?</label>
+                                            <label for="section" class="col-sm-2 col-form-label">Section</label>
                                             <div class="col-sm-10">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="is_admin" name="is_admin" value="1" <?php if ($is_admin == 1) echo 'checked'; ?>>
-                                                    <label class="form-check-label" for="is_admin">Yes, this user is an admin</label>
-                                                </div>
+                                                <input type="text" class="form-control" id="section" name="section" value="<?php echo htmlspecialchars($section); ?>">
                                             </div>
                                         </div>
 
                                         <div class="form-group row mb-3">
-                                            <label for="hire_date" class="col-sm-2 col-form-label">Hire Date</label>
+                                            <label for="enrollment_date" class="col-sm-2 col-form-label">Enrollment Date</label>
                                             <div class="col-sm-10">
-                                                <input type="date" class="form-control" id="hire_date" name="hire_date" value="<?php echo htmlspecialchars($hire_date); ?>" required>
+                                                <input type="date" class="form-control" id="enrollment_date" name="enrollment_date" value="<?php echo htmlspecialchars($enrollment_date); ?>" required>
                                             </div>
                                         </div>
 
@@ -349,7 +348,7 @@ $conn->close();
                                         <div class="form-group row">
                                             <div class="col-sm-10 offset-sm-2">
                                                 <button type="submit" class="btn btn-primary">Update</button>
-                                                <a href="employee.php?id=<?php echo $id; ?>" class="btn btn-secondary">Cancel</a>
+                                                <a href="student.php?id=<?php echo $id; ?>" class="btn btn-secondary">Cancel</a>
                                             </div>
                                         </div>
                                     </form>

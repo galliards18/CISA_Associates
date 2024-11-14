@@ -5,7 +5,7 @@ session_start();
 require_once('config.php');
 
 // Initialize variables to store user input
-$email = $password = "";
+$email = $password = $role = "";
 
 // Function to sanitize input
 function sanitize_input($data) {
@@ -20,50 +20,63 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Sanitize and store user input
     $email = sanitize_input($_POST["email"]);
     $password = sanitize_input($_POST["password"]);
+    $role = sanitize_input($_POST["role"]);  // Get the selected role (Employee or Student)
 
-    // SQL query to fetch user details based on email
-    $sql = "SELECT * FROM employee_registration WHERE email = ?";
-    
-    // Prepare the statement
-    $stmt = $conn->prepare($sql);
-    
-    // Bind parameters
-    $stmt->bind_param("s", $email);
-    
-    // Execute the query
-    $stmt->execute();
-    
-    // Get result
-    $result = $stmt->get_result();
+    // Determine the SQL query based on the role
+    if ($role == 'employee') {
+        // SQL query to fetch employee details based on email
+        $sql = "SELECT * FROM employee_registration WHERE email = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-    if ($result->num_rows == 1) {
-        // User found, fetch details
-        $row = $result->fetch_assoc();
+        if ($result->num_rows == 1) {
+            $row = $result->fetch_assoc();
+            if (password_verify($password, $row['password'])) {
+                $_SESSION['employee_id'] = $row['employee_id'];
 
-        // Verify hashed password
-        if (password_verify($password, $row['password'])) {
-            // Store employee_id in session
-            $_SESSION['employee_id'] = $row['employee_id'];
-
-            // Determine user role and redirect accordingly
-            if ($row['is_admin'] == 1) {
-                // Redirect to admin dashboard
-                $_SESSION['user_role'] = 'admin';
-                header("Location: admin/dashboard.php");
-                exit();
+                if ($row['is_admin'] == 1) {
+                    $_SESSION['user_role'] = 'admin';
+                    echo "<script>Swal.fire('Success', 'Admin login successful. Redirecting...', 'success');</script>";
+                    header("refresh:2;url=admin/dashboard.php");
+                    exit();
+                } else {
+                    $_SESSION['user_role'] = 'employee';
+                    echo "<script>Swal.fire('Success', 'Employee login successful. Redirecting...', 'success');</script>";
+                    header("refresh:2;url=employee/dashboard.php");
+                    exit();
+                }
             } else {
-                // Redirect to employee page
-                $_SESSION['user_role'] = 'employee';
-                header("Location: employee/dashboard.php");
-                exit();
+                echo "<script>Swal.fire('Error', 'Invalid password. Please try again.', 'error');</script>";
             }
         } else {
-            // Password does not match
-            echo "<script>alert('Invalid email or password. Please try again.');</script>";
+            echo "<script>Swal.fire('Error', 'Invalid email. Please try again.', 'error');</script>";
+        }
+    } elseif ($role == 'student') {
+        // SQL query to fetch student details based on email
+        $sql = "SELECT * FROM student_registration WHERE email = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows == 1) {
+            $row = $result->fetch_assoc();
+            if (password_verify($password, $row['password'])) {
+                $_SESSION['student_id'] = $row['student_id'];
+                $_SESSION['user_role'] = 'student';
+                echo "<script>Swal.fire('Success', 'Student login successful. Redirecting...', 'success');</script>";
+                header("refresh:2;url=student/dashboard.php");
+                exit();
+            } else {
+                echo "<script>Swal.fire('Error', 'Invalid password. Please try again.', 'error');</script>";
+            }
+        } else {
+            echo "<script>Swal.fire('Error', 'Invalid email. Please try again.', 'error');</script>";
         }
     } else {
-        // User not found
-        echo "<script>alert('Invalid email or password. Please try again.');</script>";
+        echo "<script>Swal.fire('Error', 'Please select a valid role.', 'error');</script>";
     }
 
     // Close statement and connection
@@ -76,13 +89,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html lang="en" class="light-style customizer-hide" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free">
 <head>
     <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
-    />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <title>Login</title>
-
     <meta name="description" content="" />
 
     <!-- Favicon -->
@@ -91,10 +99,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Link Poppins font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Icons. Uncomment required icon fonts -->
+    <!-- Icons -->
     <link rel="stylesheet" href="../assets/vendor/fonts/boxicons.css" />
 
     <!-- Core CSS -->
@@ -106,16 +113,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
 
     <!-- Page CSS -->
-    <!-- Page -->
     <link rel="stylesheet" href="../assets/vendor/css/pages/page-auth.css" />
+
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.24/dist/sweetalert2.min.css">
+
     <!-- Helpers -->
     <script src="../assets/vendor/js/helpers.js"></script>
-
-    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
-    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="../assets/js/config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.24/dist/sweetalert2.min.js"></script>
 
-    <!-- Custom CSS to apply Poppins font -->
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -130,10 +137,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <div class="card-body">
                         <center>
                             <div class="justify-content-center">
-                            <a class=" gap-2" style="font-size: 30px;">
-                                <span class=" fw-bolder">Sign In</span>
-                            </a>
-                        </div>
+                                <a class=" gap-2" style="font-size: 30px;">
+                                    <span class=" fw-bolder">Sign In</span>
+                                </a>
+                            </div>
                         </center>
                         <form id="formAuthentication" class="mb-3" method="POST">
                             <div class="mb-3">
@@ -149,6 +156,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 </div>
                             </div>
                             <div class="mb-3">
+                                <label for="role" class="form-label">Select Role</label>
+                                <select class="form-control" id="role" name="role" required>
+                                    <option value="">Select Role</option>
+                                    <option value="employee">Employee</option>
+                                    <option value="student">Student</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
                                 <button class="btn btn-primary d-grid w-100" type="submit">Sign in</button>
                             </div>
                         </form>
@@ -157,5 +172,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </div>
     </div>
+    <script>
+        // Ensure that the script is executed after the page is loaded
+        document.addEventListener('DOMContentLoaded', function () {
+            <?php if ($result->num_rows == 0 || !password_verify($password, $row['password'])): ?>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Credentials',
+                    text: 'Invalid email or password. Please try again.',
+                });
+            <?php endif; ?>
+        });
+    </script>
 </body>
 </html>

@@ -10,18 +10,20 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
 // Include the database connection script
 require '../config.php';
 
-// Assuming you fetch the first name from a database or somewhere else
+// Initialize variables
 $first_name = ''; // Initialize $first_name variable
+$last_name = '';  // Initialize $last_name variable
 
 // Fetch employee information based on session employee_id
 if (isset($_SESSION['employee_id'])) {
     $employee_id = $_SESSION['employee_id'];
-    // Example query to fetch employee first name
-    $query = "SELECT first_name FROM employee_registration WHERE employee_id = $employee_id";
+    // Example query to fetch employee first and last names
+    $query = "SELECT first_name, last_name FROM employee_registration WHERE employee_id = $employee_id";
     $result = $conn->query($query);
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
         $first_name = $row['first_name']; // Assign fetched first name to $first_name
+        $last_name = $row['last_name'];   // Assign fetched last name to $last_name
     }
 }
 
@@ -29,6 +31,11 @@ if (isset($_SESSION['employee_id'])) {
 $employeeCountQuery = "SELECT COUNT(*) AS totalEmployees FROM employee_registration";
 $result = $conn->query($employeeCountQuery);
 $totalEmployees = $result->fetch_assoc()['totalEmployees'];
+
+// Query to count the total number of students
+$studentCountQuery = "SELECT COUNT(*) AS totalStudents FROM student_registration";
+$result = $conn->query($studentCountQuery);
+$totalStudents = $result->fetch_assoc()['totalStudents'];
 
 // Query to count the number of employees present today based on the `employee_attendance_flag` table
 $today = date('Y-m-d');
@@ -54,6 +61,7 @@ $insideCampusQuery = "SELECT COUNT(DISTINCT employee_id) AS totalInside
 $result = $conn->query($insideCampusQuery);
 $totalInside = $result->fetch_assoc()['totalInside'];
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../../assets/" data-template="vertical-menu-template-free">
@@ -195,8 +203,8 @@ $totalInside = $result->fetch_assoc()['totalInside'];
                         </a>
                         <ul class="menu-sub">
                             <li class="menu-item">
-                              <a href="admin_profile.php" class="menu-link">
-                                <div data-i18n="Analytics">Profile</div>
+                              <a href="student.php" class="menu-link">
+                                <div data-i18n="Analytics">Student</div>
                               </a>
                             </li>
                             <li class="menu-item">
@@ -337,7 +345,7 @@ $totalInside = $result->fetch_assoc()['totalInside'];
                                         </div>
                                         <div class="col-sm-5 text-center text-sm-left">
                                             <div class="card-body">
-                                                    <h1 class="text-primary">Welcome, <?php echo $first_name; ?>!</h1>
+                                                <h1 class="text-primary">Welcome, <?php echo $first_name . ' ' . $last_name; ?>!</h1>
                                                 <h3 class="card-text">You have access to administrative features.</h3>
                                             </div>
                                             <div class="card-body pb-0 px-0 px-md-4 mt-5">
@@ -355,75 +363,112 @@ $totalInside = $result->fetch_assoc()['totalInside'];
                             </div>
                             <div class="col-lg-12 mb-1 order-0 container-p-y">
                                 <div class="row">
-                                    <!-- Total Employees Card -->
+                                    <!-- Total Employees & Total Students Card (Merged into one column) -->
                                     <div class="col-lg-4 mb-4">
-                                        <a href="employee.php" class="card-link">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <h5 class="card-title">Total Employees</h5>
-                                                    <p class="card-text">
-                                                        <span class="queue-number"><?php echo $totalEmployees; ?></span>
-                                                    </p>
-                                                </div>
+                                        <div class="row">
+                                            <!-- Total Employees Card -->
+                                            <div class="col-6 mb-4">
+                                                <a href="employee.php" class="card-link">
+                                                    <div class="card">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title">Total Employees</h5>
+                                                            <p class="card-text">
+                                                                <span class="queue-number"><?php echo $totalEmployees; ?></span>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </a>
                                             </div>
-                                        </a>
+                                            <!-- Total Students Card -->
+                                            <div class="col-6 mb-4">
+                                                <a href="student.php" class="card-link">
+                                                    <div class="card">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title">Total Students</h5>
+                                                            <p class="card-text">
+                                                                <span class="queue-number"><?php echo $totalStudents; ?></span>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        </div>
                                     </div>
-                                
-                                    <!-- Employees Present Today Card -->
+
+                                    <!-- Attendance Today Card -->
                                     <div class="col-lg-4 mb-4">
                                         <a href="employee_attendance_information_flag.php" class="card-link">
                                             <div class="card">
                                                 <div class="card-body">
-                                                    <h5 class="card-title">Attendance Today</h5>
+                                                    <h5 class="card-title text-center">Flag Attendance Today</h5>
                                                     <div class="attendance-summary">
                                                         <?php
-                                                        // Query to count employees present today
+                                                        // Today's date
+                                                        $today = date('Y-m-d');
+
+                                                        // Employee attendance queries
                                                         $presentCountQuery = "SELECT COUNT(*) AS totalPresent FROM employee_attendance_flag WHERE DATE(attendance_date) = '$today' AND attendance_status = 'present'";
                                                         $result = $conn->query($presentCountQuery);
-                                                        $totalPresent = $result->fetch_assoc()['totalPresent'];
+                                                        $totalEmployeePresent = $result->fetch_assoc()['totalPresent'];
 
-                                                        // Query to count employees absent today
                                                         $absentCountQuery = "SELECT COUNT(*) AS totalAbsent FROM employee_attendance_flag WHERE DATE(attendance_date) = '$today' AND attendance_status = 'absent'";
                                                         $result = $conn->query($absentCountQuery);
-                                                        $totalAbsent = $result->fetch_assoc()['totalAbsent'];
+                                                        $totalEmployeeAbsent = $result->fetch_assoc()['totalAbsent'];
 
-                                                        // Query to count employees late today
                                                         $lateCountQuery = "SELECT COUNT(*) AS totalLate FROM employee_attendance_flag WHERE DATE(attendance_date) = '$today' AND attendance_status = 'late'";
                                                         $result = $conn->query($lateCountQuery);
-                                                        $totalLate = $result->fetch_assoc()['totalLate'];
+                                                        $totalEmployeeLate = $result->fetch_assoc()['totalLate'];
+
+                                                        // Student attendance queries
+                                                        $presentStudentCountQuery = "SELECT COUNT(*) AS totalPresent FROM student_attendance_flag WHERE DATE(attendance_date) = '$today' AND attendance_status = 'present'";
+                                                        $result = $conn->query($presentStudentCountQuery);
+                                                        $totalStudentPresent = $result->fetch_assoc()['totalPresent'];
+
+                                                        $absentStudentCountQuery = "SELECT COUNT(*) AS totalAbsent FROM student_attendance_flag WHERE DATE(attendance_date) = '$today' AND attendance_status = 'absent'";
+                                                        $result = $conn->query($absentStudentCountQuery);
+                                                        $totalStudentAbsent = $result->fetch_assoc()['totalAbsent'];
+
+                                                        $lateStudentCountQuery = "SELECT COUNT(*) AS totalLate FROM student_attendance_flag WHERE DATE(attendance_date) = '$today' AND attendance_status = 'late'";
+                                                        $result = $conn->query($lateStudentCountQuery);
+                                                        $totalStudentLate = $result->fetch_assoc()['totalLate'];
                                                         ?>
 
                                                         <!-- Display on mobile screens -->
                                                         <div class="d-sm-none">
-                                                            <div class="row">
-                                                                <div class="col-12">
-                                                                    <div>Total Present: <span class="queue-number"><?php echo $totalPresent; ?></span></div>
-                                                                    <div>Total Absent: <span class="queue-number"><?php echo $totalAbsent; ?></span></div>
-                                                                    <div>Total Late: <span class="queue-number"><?php echo $totalLate; ?></span></div>
+                                                            <div class="text-center">
+                                                                <div class="row">
+                                                                    <div class="col-12">
+                                                                        <strong>Employees</strong>
+                                                                        <div>Present: <span class="queue-number"><?php echo $totalEmployeePresent; ?></span></div>
+                                                                        <div>Absent: <span class="queue-number"><?php echo $totalEmployeeAbsent; ?></span></div>
+                                                                        <div>Late: <span class="queue-number"><?php echo $totalEmployeeLate; ?></span></div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row mt-3">
+                                                                    <div class="col-12">
+                                                                        <strong>Students</strong>
+                                                                        <div>Present: <span class="queue-number"><?php echo $totalStudentPresent; ?></span></div>
+                                                                        <div>Absent: <span class="queue-number"><?php echo $totalStudentAbsent; ?></span></div>
+                                                                        <div>Late: <span class="queue-number"><?php echo $totalStudentLate; ?></span></div>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                         
                                                         <!-- Display on larger screens -->
                                                         <div class="d-none d-sm-block">
-                                                            <div class="row">
-                                                                <div class="col-md-4">
-                                                                    <div class="text-center">
-                                                                        <div>Total Present</div>
-                                                                        <span class="queue-number"><?php echo $totalPresent; ?></span>
-                                                                    </div>
+                                                            <div class="row text-center">
+                                                                <div class="col-md-6">
+                                                                    <strong>Employees</strong>
+                                                                    <div>Present: <span class="queue-number"><?php echo $totalEmployeePresent; ?></span></div>
+                                                                    <div>Absent: <span class="queue-number"><?php echo $totalEmployeeAbsent; ?></span></div>
+                                                                    <div>Late: <span class="queue-number"><?php echo $totalEmployeeLate; ?></span></div>
                                                                 </div>
-                                                                <div class="col-md-4">
-                                                                    <div class="text-center">
-                                                                        <div>Total Absent</div>
-                                                                        <span class="queue-number"><?php echo $totalAbsent; ?></span>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-4">
-                                                                    <div class="text-center">
-                                                                        <div>Total Late</div>
-                                                                        <span class="queue-number"><?php echo $totalLate; ?></span>
-                                                                    </div>
+                                                                <div class="col-md-6">
+                                                                    <strong>Students</strong>
+                                                                    <div>Present: <span class="queue-number"><?php echo $totalStudentPresent; ?></span></div>
+                                                                    <div>Absent: <span class="queue-number"><?php echo $totalStudentAbsent; ?></span></div>
+                                                                    <div>Late: <span class="queue-number"><?php echo $totalStudentLate; ?></span></div>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -438,7 +483,7 @@ $totalInside = $result->fetch_assoc()['totalInside'];
                                         <a href="attendance_gate.php" class="card-link">
                                             <div class="card">
                                                 <div class="card-body">
-                                                    <h5 class="card-title">Currently Inside Campus</h5>
+                                                    <h5 class="card-title">Employee Currently Inside Campus</h5>
                                                     <p class="card-text">
                                                         <span class="queue-number"><?php echo $totalInside; ?></span>
                                                     </p>

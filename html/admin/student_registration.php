@@ -12,44 +12,53 @@ require '../config.php';
 
 // Processing form data when form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Define variables and initialize with empty values
-    $first_name = $last_name = $email = $password = $phone_number = $department = $position = $address = $city = $postal_code = $country = $date_of_birth = $gender = $emergency_contact_name = $emergency_contact_number = '';
-    $is_admin = isset($_POST['is_admin']) ? 1 : 0; // Check if admin checkbox is checked
+    // Initialize variables with empty values
+    $first_name = $last_name = $email = $password = $phone_number = $department = $year_level = $section = $address = $city = $postal_code = $country = $date_of_birth = $gender = $emergency_contact_name = $emergency_contact_number = '';
 
-    // Validate input (you may add more specific validations as needed)
-    $first_name = trim($_POST['first_name']);
-    $last_name = trim($_POST['last_name']);
-    $email = trim($_POST['email']);
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT); // Hash password for security
-    $phone_number = trim($_POST['phone_number']);
-    $department = trim($_POST['department']);
-    $position = trim($_POST['position']);
-    $address = trim($_POST['address']);
-    $city = trim($_POST['city']);
-    $postal_code = trim($_POST['postal_code']);
-    $country = trim($_POST['country']);
-    $date_of_birth = $_POST['date_of_birth'];
-    $gender = $_POST['gender'];
-    $emergency_contact_name = trim($_POST['emergency_contact_name']);
-    $emergency_contact_number = trim($_POST['emergency_contact_number']);
+    // Validate and sanitize input
+    $first_name = isset($_POST['first_name']) ? trim($_POST['first_name']) : '';
+    $last_name = isset($_POST['last_name']) ? trim($_POST['last_name']) : '';
+    $email = isset($_POST['email']) ? trim($_POST['email']) : '';
+    $password = isset($_POST['password']) ? password_hash(trim($_POST['password']), PASSWORD_DEFAULT) : ''; // Hash password for security
+    $phone_number = isset($_POST['phone_number']) ? trim($_POST['phone_number']) : '';
+    $department = isset($_POST['department']) ? trim($_POST['department']) : '';
+    $year_level = isset($_POST['year_level']) ? trim($_POST['year_level']) : '';
+    $section = isset($_POST['section']) ? trim($_POST['section']) : '';
+    $address = isset($_POST['address']) ? trim($_POST['address']) : '';
+    $city = isset($_POST['city']) ? trim($_POST['city']) : '';
+    $postal_code = isset($_POST['postal_code']) ? trim($_POST['postal_code']) : '';
+    $country = isset($_POST['country']) ? trim($_POST['country']) : '';
+    $date_of_birth = isset($_POST['date_of_birth']) ? $_POST['date_of_birth'] : null;
+    $gender = isset($_POST['gender']) ? $_POST['gender'] : '';
+    $emergency_contact_name = isset($_POST['emergency_contact_name']) ? trim($_POST['emergency_contact_name']) : '';
+    $emergency_contact_number = isset($_POST['emergency_contact_number']) ? trim($_POST['emergency_contact_number']) : '';
 
-    // SQL statement to insert data
-    $sql = "INSERT INTO employee_registration (first_name, last_name, email, password, phone_number, department, position, is_admin, address, city, postal_code, country, date_of_birth, gender, emergency_contact_name, emergency_contact_number)
-            VALUES ('$first_name', '$last_name', '$email', '$password', '$phone_number', '$department', '$position', '$is_admin', '$address', '$city', '$postal_code', '$country', '$date_of_birth', '$gender', '$emergency_contact_name', '$emergency_contact_number')";
+    // Prepared statement for secure SQL execution
+    $stmt = $conn->prepare("INSERT INTO student_registration (first_name, last_name, email, password, phone_number, department, year_level, section, enrollment_date, address, city, postal_code, country, date_of_birth, gender, emergency_contact_name, emergency_contact_number)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-    if ($conn->query($sql) === TRUE) {
-        echo "<script>alert('Employee registered successfully.');</script>";
-        // Redirect or show success message
-        header("Location: employee.php"); // Redirect to employee list page after successful registration
-        exit();
+    if ($stmt) {
+        // Bind parameters to prevent SQL injection
+        $stmt->bind_param("ssssssssssssssss", $first_name, $last_name, $email, $password, $phone_number, $department, $year_level, $section, $address, $city, $postal_code, $country, $date_of_birth, $gender, $emergency_contact_name, $emergency_contact_number);
+
+        // Execute statement and check for success
+        if ($stmt->execute()) {
+            echo "<script>alert('Student registered successfully.');</script>";
+            header("Location: student.php"); // Redirect after successful registration
+            exit();
+        } else {
+            echo "Error: " . $stmt->error;
+        }
+        $stmt->close();
     } else {
-        echo "Error: " . $sql . "<br>" . $conn->error;
+        echo "Error preparing statement: " . $conn->error;
     }
 
     // Close connection
     $conn->close();
 }
 ?>
+
 
 <!DOCTYPE html>
 <html
@@ -289,102 +298,99 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                               <!-- Personal Details -->
                               <h3>Personal Details</h3>
                               <div class="row">
-                                  <div class="mb-3 col-md-6">
-                                      <label for="first_name" class="form-label">First Name:</label>
-                                      <input type="text" id="first_name" name="first_name" class="form-control" required>
-                                  </div>
-                                  <div class="mb-3 col-md-6">
-                                      <label for="last_name" class="form-label">Last Name:</label>
-                                      <input type="text" id="last_name" name="last_name" class="form-control" required>
-                                  </div>
-                                  <div class="mb-3 col-md-6">
-                                      <label for="email" class="form-label">Email:</label>
-                                      <input type="email" id="email" name="email" class="form-control" required>
-                                  </div>
-                                  <div class="mb-3 col-md-6">
-                                      <label for="password" class="form-label">Password:</label>
-                                      <input type="password" id="password" name="password" class="form-control" required>
-                                  </div>
-                                  <div class="mb-3 col-md-6">
-                                      <label for="date_of_birth" class="form-label">Date of Birth:</label>
-                                      <input type="date" id="date_of_birth" name="date_of_birth" class="form-control">
-                                  </div>
-                                  <div class="mb-3 col-md-6">
-                                      <label for="gender" class="form-label">Gender:</label>
-                                      <select id="gender" name="gender" class="form-control">
-                                          <option value="Male">Male</option>
-                                          <option value="Female">Female</option>
-                                      </select>
-                                  </div>
+                                <div class="mb-3 col-md-6">
+                                  <label for="first_name" class="form-label">First Name:</label>
+                                  <input type="text" id="first_name" name="first_name" class="form-control" required>
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                  <label for="last_name" class="form-label">Last Name:</label>
+                                  <input type="text" id="last_name" name="last_name" class="form-control" required>
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                  <label for="email" class="form-label">Email:</label>
+                                  <input type="email" id="email" name="email" class="form-control" required>
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                  <label for="password" class="form-label">Password:</label>
+                                  <input type="password" id="password" name="password" class="form-control" required>
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                  <label for="date_of_birth" class="form-label">Date of Birth:</label>
+                                  <input type="date" id="date_of_birth" name="date_of_birth" class="form-control">
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                  <label for="gender" class="form-label">Gender:</label>
+                                  <select id="gender" name="gender" class="form-control">
+                                    <option value="">Select</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                  </select>
+                                </div>
                               </div>
 
                               <!-- Contact Information -->
                               <h3>Contact Information</h3>
                               <div class="row">
-                                  <div class="mb-3 col-md-6">
-                                      <label for="phone_number" class="form-label">Phone Number:</label>
-                                      <input type="text" id="phone_number" name="phone_number" class="form-control">
-                                  </div>
-                                  <div class="mb-3 col-md-6">
-                                      <label for="address" class="form-label">Address:</label>
-                                      <input type="text" id="address" name="address" class="form-control">
-                                  </div>
-                                  <div class="mb-3 col-md-6">
-                                      <label for="city" class="form-label">City:</label>
-                                      <input type="text" id="city" name="city" class="form-control">
-                                  </div>
-                                  <div class="mb-3 col-md-6">
-                                      <label for="postal_code" class="form-label">Postal Code:</label>
-                                      <input type="text" id="postal_code" name="postal_code" class="form-control">
-                                  </div>
-                                  <div class="mb-3 col-md-6">
-                                      <label for="country" class="form-label">Country:</label>
-                                      <input type="text" id="country" name="country" class="form-control">
-                                  </div>
-                              </div>
-
-                              <!-- Employment Details -->
-                              <h3>Employment Details</h3>
-                              <div class="row">
-                                  <div class="mb-3 col-md-6">
-                                      <label for="department" class="form-label">Department:</label>
-                                      <select id="department" name="department" class="form-control">
-                                          <option value="BSIT">BSIT</option>
-                                          <option value="BSMB">BSMB</option>
-                                          <option value="BSF">BSF</option>
-                                          <option value="BSA">BSA</option>
-                                      </select>
-                                  </div>
-                                  <div class="mb-3 col-md-6">
-                                      <label for="position" class="form-label">Position:</label>
-                                      <input type="text" id="position" name="position" class="form-control">
-                                  </div>
-                                  <div class="mb-3 col-md-6">
-                                      <label for="hire_date" class="form-label">Hire Date:</label>
-                                      <input type="date" id="hire_date" name="hire_date" class="form-control" required>
-                                  </div>
-                                  <div class="mb-3 col-md-6">
-                                      <label for="is_admin" class="form-label">Is Admin:</label>
-                                      <input type="checkbox" id="is_admin" name="is_admin" value="1" class="form-check-input">
-                                  </div>
+                                <div class="mb-3 col-md-6">
+                                  <label for="phone_number" class="form-label">Phone Number:</label>
+                                  <input type="text" id="phone_number" name="phone_number" class="form-control">
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                  <label for="department" class="form-label">Department:</label>
+                                  <select id="department" name="department" class="form-control">
+                                    <option value="">Select Department</option>
+                                    <option value="BSIT">BS in Information Technology (BSIT)</option>
+                                    <option value="BSFI">BS in Financial Engineering (BSFI)</option>
+                                    <option value="BSA">BS in Accountancy (BSA)</option>
+                                  </select>
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                  <label for="year_level" class="form-label">Year Level:</label>
+                                  <input type="number" id="year_level" name="year_level" class="form-control" min="1" max="5">
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                  <label for="section" class="form-label">Section:</label>
+                                  <select id="section" name="section" class="form-control">
+                                    <option value="">Select Section</option>
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="C">C</option>
+                                  </select>
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                  <label for="address" class="form-label">Address:</label>
+                                  <input type="text" id="address" name="address" class="form-control">
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                  <label for="city" class="form-label">City:</label>
+                                  <input type="text" id="city" name="city" class="form-control">
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                  <label for="postal_code" class="form-label">Postal Code:</label>
+                                  <input type="text" id="postal_code" name="postal_code" class="form-control">
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                  <label for="country" class="form-label">Country:</label>
+                                  <input type="text" id="country" name="country" class="form-control">
+                                </div>
                               </div>
 
                               <!-- Emergency Contact -->
                               <h3>Emergency Contact</h3>
                               <div class="row">
-                                  <div class="mb-3 col-md-6">
-                                      <label for="emergency_contact_name" class="form-label">Contact Name:</label>
-                                      <input type="text" id="emergency_contact_name" name="emergency_contact_name" class="form-control">
-                                  </div>
-                                  <div class="mb-3 col-md-6">
-                                      <label for="emergency_contact_number" class="form-label">Contact Number:</label>
-                                      <input type="text" id="emergency_contact_number" name="emergency_contact_number" class="form-control">
-                                  </div>
+                                <div class="mb-3 col-md-6">
+                                  <label for="emergency_contact_name" class="form-label">Guardian's Name:</label>
+                                  <input type="text" id="emergency_contact_name" name="emergency_contact_name" class="form-control">
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                  <label for="emergency_contact_number" class="form-label">Guardian's Contact Number:</label>
+                                  <input type="text" id="emergency_contact_number" name="emergency_contact_number" class="form-control">
+                                </div>
                               </div>
 
-                              <!-- Submit -->
-                              <input type="submit" value="Register" class="btn btn-primary">
-                          </form>
+                              <!-- Submit Button -->
+                              <button type="submit" class="btn btn-primary">Register Student</button>
+                            </form>
 
                           </div>
                         </div>

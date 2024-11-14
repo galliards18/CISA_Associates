@@ -15,7 +15,7 @@ $message = "";
 
 // Handle reset button click
 if (isset($_POST['reset'])) {
-    $reset_sql = "UPDATE employee_registration SET is_assigned = 0";
+    $reset_sql = "UPDATE student_registration SET is_assigned = 0";
     if ($conn->query($reset_sql) === TRUE) {
         $message = "All assignments reset successfully.";
     } else {
@@ -26,11 +26,11 @@ if (isset($_POST['reset'])) {
 }
 
 // Check if an employee is clicked for assignment
-if (isset($_GET['employee_id'])) {
-    $employee_id = $_GET['employee_id'];
+if (isset($_GET['student_id'])) {
+    $employee_id = $_GET['student_id'];
 
     // Check if employee is already assigned
-    $check_sql = "SELECT is_assigned FROM employee_registration WHERE employee_id = ?";
+    $check_sql = "SELECT is_assigned FROM student_registration WHERE student_id = ?";
     $check_stmt = $conn->prepare($check_sql);
     $check_stmt->bind_param("i", $employee_id);
     $check_stmt->execute();
@@ -39,45 +39,40 @@ if (isset($_GET['employee_id'])) {
     if ($check_result->num_rows > 0) {
         $row = $check_result->fetch_assoc();
         if ($row['is_assigned'] > 0) {
-            $message = "Employee is already assigned.";
+            $message = "Student is already assigned.";
         } else {
-            // Update is_assigned for the clicked employee
-            $update_sql = "UPDATE employee_registration SET is_assigned = 1 WHERE employee_id = ?";
+            // Update is_assigned_department for the clicked employee
+            $update_sql = "UPDATE student_registration SET is_assigned = 1 WHERE student_id = ?";
             $update_stmt = $conn->prepare($update_sql);
             $update_stmt->bind_param("i", $employee_id);
 
             if ($update_stmt->execute()) {
-                $message = "Employee assigned successfully.";
+                $message = "Student assigned successfully.";
             } else {
-                $message = "Error assigning employee: " . $update_stmt->error;
+                $message = "Error assigning student: " . $update_stmt->error;
             }
 
             $update_stmt->close();
         }
     } else {
-        $message = "Employee not found.";
+        $message = "Student not found.";
     }
 
     echo json_encode(array('message' => $message));
     exit(); // Stop further execution after assigning or error
 }
 
-// Fetch all non-admin employees
-$sql = "SELECT * FROM employee_registration WHERE is_admin = 0";
-$result = $conn->query($sql);
-
 // Check if there is a search term
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 
 // Modify SQL to filter based on search term
-$sql = "SELECT * FROM employee_registration WHERE is_admin = 0 AND (first_name LIKE ? OR last_name LIKE ? OR email LIKE ?)";
+$sql = "SELECT * FROM student_registration WHERE first_name LIKE ? OR last_name LIKE ? OR email LIKE ?";
 $stmt = $conn->prepare($sql);
 $search_term = "%$search%";
 $stmt->bind_param("sss", $search_term, $search_term, $search_term);
 $stmt->execute();
 $result = $stmt->get_result();
 ?>
-
 <!DOCTYPE html>
 <html lang="en" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../../assets/" data-template="vertical-menu-template-free">
 <head>
@@ -131,73 +126,73 @@ $result = $stmt->get_result();
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
-    $(document).ready(function() {
-        // AJAX function to assign employee and update UI
-        $(".assign-button").click(function(e) {
-            e.preventDefault();
-            var employee_id = $(this).data('employee-id');
-            $.ajax({
-                type: "GET",
-                url: "assign_employee.php",
-                data: { employee_id: employee_id },
-                dataType: 'json',
-                success: function(response) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: response.message
-                    }).then(() => {
-                        location.reload();
-                    });
-                },
-                error: function(xhr, status, error) {
-                    var errorMessage = xhr.responseJSON.message || "Error assigning employee.";
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: errorMessage
-                    });
-                }
+        $(document).ready(function() {
+            // AJAX function to assign employee and update UI
+            $(".assign-button").click(function(e) {
+                e.preventDefault();
+                var student_id = $(this).data('student-id');
+                $.ajax({
+                    type: "GET",
+                    url: "assign_student.php",
+                    data: { student_id: student_id },
+                    dataType: 'json',
+                    success: function(response) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: response.message
+                        }).then(() => {
+                            location.reload();
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        var errorMessage = xhr.responseJSON.message || "Error assigning student.";
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: errorMessage
+                        });
+                    }
+                });
             });
-        });
 
-        // AJAX function to handle reset button click
-        $("#resetButton").click(function(e) {
-            e.preventDefault();
-            $.ajax({
-                type: "POST",
-                url: "assign_employee.php",
-                data: { reset: true },
-                dataType: 'json',
-                success: function(response) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: response.message
-                    }).then(() => {
-                        location.reload();
-                    });
-                },
-                error: function(xhr, status, error) {
-                    var errorMessage = xhr.responseJSON.message || "Error resetting assignments.";
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: errorMessage
-                    });
-                }
+            // AJAX function to handle reset button click
+            $("#resetButton").click(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    type: "POST",
+                    url: "assign_student.php",
+                    data: { reset: true },
+                    dataType: 'json',
+                    success: function(response) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: response.message
+                        }).then(() => {
+                            location.reload();
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        var errorMessage = xhr.responseJSON.message || "Error resetting assignments.";
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: errorMessage
+                        });
+                    }
+                });
             });
-        });
 
-        // Filter table based on search input
-        $("#searchInput").on("keyup", function() {
-            var value = $(this).val().toLowerCase();
-            $("#employeeTableBody tr").filter(function() {
-                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+            // Filter table based on search input
+            $("#searchInput").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#studentTableBody tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+                });
             });
         });
-    });
-</script>
+    </script>
 
 
 
@@ -457,49 +452,50 @@ $result = $stmt->get_result();
                             <div class="col-lg-12 mb-4 order-0">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h1 class="mb-4">Assign Employee for Flag Ceremony Attendance</h1>
+                                        <h1 class="mb-4">Assign Student for Flag Ceremony Attendance</h1>
                                         <div id="message" class="alert alert-success" role="alert" style="display: none;"></div>
                                         <button id="resetButton" class="btn btn-danger mb-4">Reset Assignments</button>
                                         <div class="table-responsive">
                                         <table class="table table-striped">
-                                            <thead>
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>Action</th> <!-- Moved Action column header here -->
-                                                    <th>First Name</th>
-                                                    <th>Last Name</th>
-                                                    <th>Email</th>
-                                                    <th>Department</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="employeeTableBody">
-                                                <?php
-                                                // Display non-admin employees in table rows with numbered rows
-                                                $counter = 1;
-                                                if ($result->num_rows > 0) {
-                                                    while ($row = $result->fetch_assoc()) {
-                                                        echo "<tr>";
-                                                        echo "<td>{$counter}</td>";
-                                                        echo "<td>"; // Moved Action buttons here
-                                                        if ($row['is_assigned'] == 0) {
-                                                            echo "<button class='btn btn-primary assign-button' data-employee-id='{$row['employee_id']}'>Assign for Attendance</button>";
-                                                        } else {
-                                                            echo "<span class='badge badge-danger'>Already Assigned</span>";
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Action</th>
+                                                        <th>First Name</th>
+                                                        <th>Last Name</th>
+                                                        <th>Email</th>
+                                                        <th>Department</th>
+                                                        <th>Section</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="studentTableBody">
+                                                    <?php
+                                                    $counter = 1;
+                                                    if ($result->num_rows > 0) {
+                                                        while ($row = $result->fetch_assoc()) {
+                                                            echo "<tr>";
+                                                            echo "<td>{$counter}</td>";
+                                                            echo "<td class='text-nowrap'>";
+                                                            if ($row['is_assigned'] == 0) {
+                                                                echo "<button class='btn btn-primary assign-button' data-student-id='{$row['student_id']}'>Assign for Attendance</button>";
+                                                            } else {
+                                                                echo "<span class='badge badge-danger'>Already Assigned</span>";
+                                                            }
+                                                            echo "</td>";
+                                                            echo "<td>{$row['first_name']}</td>";
+                                                            echo "<td>{$row['last_name']}</td>";
+                                                            echo "<td>{$row['email']}</td>";
+                                                            echo "<td>{$row['department']}</td>";
+                                                            echo "<td>{$row['section']}</td>";
+                                                            echo "</tr>";
+                                                            $counter++;
                                                         }
-                                                        echo "</td>";
-                                                        echo "<td>{$row['first_name']}</td>";
-                                                        echo "<td>{$row['last_name']}</td>";
-                                                        echo "<td>{$row['email']}</td>";
-                                                        echo "<td>{$row['department']}</td>";
-                                                        echo "</tr>";
-                                                        $counter++;
+                                                    } else {
+                                                        echo "<tr><td colspan='7'>No non-admin students found.</td></tr>";
                                                     }
-                                                } else {
-                                                    echo "<tr><td colspan='6'>No non-admin employees found.</td></tr>";
-                                                }
-                                                ?>
-                                            </tbody>
-                                        </table>
+                                                    ?>
+                                                </tbody>
+                                            </table>
                                     </div>
                                             <!-- After the table in your existing code -->
                                   <div class="centered-button">

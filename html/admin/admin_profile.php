@@ -134,8 +134,8 @@ $conn->close();
               </a>
               <ul class="menu-sub active">
                 <li class="menu-item active">
-                  <a href="admin_profile.php" class="menu-link">
-                    <div data-i18n="Analytics">Profile</div>
+                  <a href="student.php" class="menu-link">
+                    <div data-i18n="Analytics">Student</div>
                   </a>
                 </li>
                 <li class="menu-item">

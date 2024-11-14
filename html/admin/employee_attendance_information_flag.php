@@ -189,8 +189,8 @@ $result = $stmt->get_result();
                         </a>
                         <ul class="menu-sub">
                             <li class="menu-item">
-                              <a href="admin_profile.php" class="menu-link">
-                                <div data-i18n="Analytics">Profile</div>
+                              <a href="student.php" class="menu-link">
+                                <div data-i18n="Analytics">Student</div>
                               </a>
                             </li>
                             <li class="menu-item">
@@ -351,15 +351,20 @@ $result = $stmt->get_result();
                       <div class="col">
                         <div class="row justify-content-start align-items-start">
                           <div class="col-lg-5 mb-3 text-start">
-    <div class="d-flex align-items-center mb-3 justify-content-between">
-        <a href="assign_employee.php" class="btn btn-primary w-70">Assign Employee for Attendance</a>
-        <a href="attendance_flag_history.php" class="btn btn-primary w-30 ml-end">History</a>
-    </div>
-    <div class="d-flex align-items-center justify-content-between">
-        <a href="assign_employee_department.php" class="btn btn-primary w-70">Assign Employee for Each Department</a>
-        <a href="attendance_flag_history_department.php" class="btn btn-primary w-30 ml-end">History</a>
-    </div>
-</div>
+                            <div class="d-flex align-items-center mb-3 justify-content-between">
+                                <a href="assign_employee.php" class="btn btn-primary flex-grow-1 me-2">Assign Employee for Attendance</a>
+                                <a href="attendance_flag_history.php" class="btn btn-primary">History</a>
+                            </div>
+                            <div class="d-flex align-items-center mb-3 justify-content-between">
+                                <a href="assign_employee_department.php" class="btn btn-primary flex-grow-1 me-2">Assign Employee for Department</a>
+                                <a href="attendance_flag_history_department.php" class="btn btn-primary">History</a>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <a href="assign_student.php" class="btn btn-primary flex-grow-1 me-2">Assign Student for Attendance</a>
+                                <a href="attendance_flag_history_student.php" class="btn btn-primary">History</a>
+                            </div>
+                        </div>
+
 
                       </div>
                       <div class="table-responsive">

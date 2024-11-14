@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Sep 04, 2024 at 10:27 AM
+-- Generation Time: Nov 14, 2024 at 01:00 PM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -73,7 +73,14 @@ INSERT INTO `employee_attendance_flag` (`attendance_id`, `employee_id`, `attenda
 (169, 9, '2024-07-04 14:55:14', 'absent', 1),
 (170, 2, '2024-07-29 10:35:05', 'present', 1),
 (171, 3, '2024-07-29 10:35:11', 'late', 1),
-(172, 2, '2024-09-04 15:48:22', 'present', 1);
+(172, 2, '2024-09-04 15:48:22', 'present', 1),
+(173, 2, '2024-11-14 19:35:28', 'present', 1),
+(174, 3, '2024-11-14 19:35:34', 'late', 1),
+(175, 4, '2024-11-14 19:35:40', 'absent', 1),
+(176, 5, '2024-11-14 19:35:44', 'present', 1),
+(177, 6, '2024-11-14 19:35:49', 'present', 1),
+(178, 7, '2024-11-14 19:35:53', 'late', 1),
+(179, 9, '2024-11-14 19:35:58', 'present', 1);
 
 -- --------------------------------------------------------
 
@@ -159,7 +166,7 @@ CREATE TABLE `employee_registration` (
 --
 
 INSERT INTO `employee_registration` (`employee_id`, `first_name`, `last_name`, `email`, `password`, `phone_number`, `department`, `position`, `is_admin`, `hire_date`, `address`, `city`, `postal_code`, `country`, `date_of_birth`, `gender`, `emergency_contact_name`, `emergency_contact_number`, `created_at`, `updated_at`, `is_assigned`, `is_assigned_department`) VALUES
-(2, 'Re Ann', 'Nunez', 'reannsabandal544@gmail.com', '$2y$10$o3.YKXQaRdHjqtSV0Tnqgu1RMXKHs7p19tTS5tI7Siw.Mi.bW3nRq', '09383403973', 'BSN', 'Employee', 0, '2024-06-07', 'Cambite, Tomas Oppus, Southern Leyte', 'Maasin City', '6605', 'Philippines', '2002-11-10', 'Male', 'RICO JAMES MAITIM SABANDAL', '09383403973', '2024-06-24 12:50:33', '2024-09-04 09:41:56', 0, 0),
+(2, 'Re Ann', 'Nunez', 'reannsabandal544@gmail.com', '$2y$10$o3.YKXQaRdHjqtSV0Tnqgu1RMXKHs7p19tTS5tI7Siw.Mi.bW3nRq', '09383403973', 'BSN', 'Employee', 0, '2024-06-07', 'Cambite, Tomas Oppus, Southern Leyte', 'Maasin City', '6605', 'Philippines', '2002-11-10', 'Male', 'RICO JAMES MAITIM SABANDAL', '09383403973', '2024-06-24 12:50:33', '2024-11-13 15:07:30', 0, 1),
 (3, 'Rico James', 'Sabandal', 'jamessabandal544@gmail.com', '$2y$10$15d10bryJmLT3bEpP7akTOEEoE9sFMzwCz3vjUQhITwdPrm4uIGsC', '09383403973', 'BSIT', 'Dean', 0, '2024-06-05', 'Tinago, Tomas Oppus, Southern leyte', 'Maasin City', '6605', 'Philippines', '2000-12-18', 'Male', 're ann nunez', '09383403973', '2024-06-24 16:31:46', '2024-09-04 09:41:56', 0, 0),
 (4, 'Ryan', 'Nunez', 'ryansabandal544@gmail.com', '$2y$10$uWI7M1XgJ5fwIq0qZrEM3OZVS8o.2TI8NZpjVALVvF5wMH1Dn3Rh.', '09383403973', 'BSN', 'Dean', 0, NULL, 'Cambite, Tomas Oppus, Southern leyte', 'Maasin City', '6605', 'Philippines', '2024-06-20', 'Male', 're ann nunez', '09383403973', '2024-06-25 01:46:44', '2024-07-04 02:28:34', 0, 0),
 (5, 'Riche Jim', 'Sabandal', 'richesabandal544@gmail.com', '$2y$10$LbwbWv7PfBJ6xNhWz3OV/.Kyx7nmqnaP2sOzQ7Ci/BXEkpvGI09Lm', '09383403973', 'BSN', 'Dean', 0, NULL, 'Tinago, Tomas Oppus, Southern leyte', 'Maasin City', '6605', 'Philippines', '2024-06-14', 'Male', 'RICO JAMES MAITIM SABANDAL', '09383403973', '2024-06-25 09:39:22', '2024-09-04 09:41:56', 0, 0),
@@ -185,6 +192,60 @@ CREATE TABLE `flag_type` (
 INSERT INTO `flag_type` (`flag_id`, `flag_type`) VALUES
 (1, 'Flag Raising'),
 (2, 'Flag Retreat');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `student_attendance_flag`
+--
+
+CREATE TABLE `student_attendance_flag` (
+  `attendance_id` int NOT NULL,
+  `student_id` int NOT NULL,
+  `attendance_date` datetime NOT NULL,
+  `attendance_status` varchar(20) NOT NULL,
+  `flag_id` int DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `student_registration`
+--
+
+CREATE TABLE `student_registration` (
+  `student_id` int NOT NULL,
+  `first_name` varchar(50) NOT NULL,
+  `last_name` varchar(50) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone_number` varchar(15) DEFAULT NULL,
+  `department` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `year_level` int DEFAULT NULL,
+  `section` varchar(50) DEFAULT NULL,
+  `enrollment_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `address` varchar(255) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `postal_code` varchar(20) DEFAULT NULL,
+  `country` varchar(50) DEFAULT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `gender` varchar(10) DEFAULT NULL,
+  `emergency_contact_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `emergency_contact_number` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `is_assigned` tinyint(1) NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `student_registration`
+--
+
+INSERT INTO `student_registration` (`student_id`, `first_name`, `last_name`, `email`, `password`, `phone_number`, `department`, `year_level`, `section`, `enrollment_date`, `address`, `city`, `postal_code`, `country`, `date_of_birth`, `gender`, `emergency_contact_name`, `emergency_contact_number`, `created_at`, `updated_at`, `is_assigned`) VALUES
+(1, 'Rico James', 'Sabandal', 'ricosabandal544@gmail.com', '$2y$10$k76qFas1u.cBHrHiA.DJwOFHgkaC0kU5KQQTmBQFmSk7wMsY5t53i', '09383403973', 'BSIT', 3, 'A', '2000-12-17 16:00:00', 'Tinago, Tomas Oppus, Southern Leyte', 'Maasin City', '3444', 'Philippines', '2000-12-18', 'Male', 'Re Ann Nunez', '09383403973', '2024-11-13 03:39:04', '2024-11-14 10:59:03', 0),
+(2, 'qqq', 'qqqq', 'qqq@qqq', '$2y$10$iDryjXAOuIcxmgipIXxCTOaOiv14KzTQ3ysZX4L.lzGSlAYEsAhsW', '09383403973', '', NULL, NULL, NULL, 'Tinago, Tomas Oppus, Southern Leyte', 'Maasin City', '3444', 'Philippines', '2000-12-18', 'Male', '', '', '2024-11-13 14:03:36', '2024-11-13 14:03:36', 0),
+(3, 'Re Ann', 'Sabandal', 'reannsabandal544@gmail.com', '$2y$10$S3BT7c8SI3SkH7FQmuGFuuUfxJbmBTNbxUSCIvcsa8Fk2w0PyYSD6', '09383403973', 'BSIT', 3, 'A', '2024-11-13 14:16:12', 'Tinago, Tomas Oppus, Southern Leyte', 'Maasin City', '3444', 'Philippines', '2002-11-10', 'Female', 'Re Ann Nunez', '09383403973', '2024-11-13 14:16:12', '2024-11-13 14:16:12', 0),
+(4, 'admin', 'admin', 'admin@admin', '$2y$10$l7VO7pC3XKX03h2xfi1I3./bvJYo6DWhK7Th4yrtKUToGqKJlvO12', '09383403973', 'BSIT', 3, 'B', '2024-11-14 12:37:07', 'admin', 'admin', 'admin', 'admin', '2000-12-18', 'Male', 'admin', 'admin', '2024-11-14 12:37:07', '2024-11-14 12:37:07', 0);
 
 --
 -- Indexes for dumped tables
@@ -228,6 +289,20 @@ ALTER TABLE `flag_type`
   ADD PRIMARY KEY (`flag_id`);
 
 --
+-- Indexes for table `student_attendance_flag`
+--
+ALTER TABLE `student_attendance_flag`
+  ADD PRIMARY KEY (`attendance_id`),
+  ADD KEY `student_id` (`student_id`),
+  ADD KEY `flag_id` (`flag_id`);
+
+--
+-- Indexes for table `student_registration`
+--
+ALTER TABLE `student_registration`
+  ADD PRIMARY KEY (`student_id`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -241,7 +316,7 @@ ALTER TABLE `employee_attendance_department`
 -- AUTO_INCREMENT for table `employee_attendance_flag`
 --
 ALTER TABLE `employee_attendance_flag`
-  MODIFY `attendance_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=173;
+  MODIFY `attendance_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=180;
 
 --
 -- AUTO_INCREMENT for table `employee_attendance_gate`
@@ -260,6 +335,18 @@ ALTER TABLE `employee_registration`
 --
 ALTER TABLE `flag_type`
   MODIFY `flag_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `student_attendance_flag`
+--
+ALTER TABLE `student_attendance_flag`
+  MODIFY `attendance_id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `student_registration`
+--
+ALTER TABLE `student_registration`
+  MODIFY `student_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Constraints for dumped tables
@@ -284,6 +371,13 @@ ALTER TABLE `employee_attendance_flag`
 --
 ALTER TABLE `employee_attendance_gate`
   ADD CONSTRAINT `employee_attendance_gate_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee_registration` (`employee_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `student_attendance_flag`
+--
+ALTER TABLE `student_attendance_flag`
+  ADD CONSTRAINT `student_attendance_flag_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `student_registration` (`student_id`),
+  ADD CONSTRAINT `student_attendance_flag_ibfk_2` FOREIGN KEY (`flag_id`) REFERENCES `flag_type` (`flag_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
