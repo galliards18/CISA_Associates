@@ -143,6 +143,38 @@ $result = $stmt->get_result();
         }
     }
     </script>
+    <style>
+          /* Adjust dropdown width */
+    .custom-dropdown-menu {
+        min-width: 100%;
+    }
+
+    /* Dropdown item padding and alignment */
+    .custom-dropdown-item {
+        padding: 8px 15px;
+        font-size: 1rem; /* Adjust font size */
+    }
+
+    /* Styling for the assign links */
+    .assign-link {
+        color: #0d6efd; /* Bootstrap's primary color */
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    /* Custom style for the History button */
+    .btn-secondary.btn-sm {
+        font-size: 0.875rem; /* Smaller font for compact look */
+        padding: 5px 10px; /* Adjust padding */
+    }
+
+    /* Adjust dropdown button styling */
+    .dropdown-toggle {
+        font-size: 1.1rem;
+        padding: 10px 15px;
+    }
+
+    </style>
 
 
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
@@ -176,85 +208,90 @@ $result = $stmt->get_result();
 
           <ul class="menu-inner py-1">
             <!-- Dashboard -->
+            <li class="menu-item">
+              <a href="dashboard.php" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-chalkboard"></i>
+                <div data-i18n="Analytics">Dashboard</div>
+              </a>
+            </li>
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-user-circle"></i>
+                    <div data-i18n="Layouts">User</div>
+                </a>
+                <ul class="menu-sub">
                     <li class="menu-item">
-                      <a href="dashboard.php" class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-chalkboard"></i>
-                        <div data-i18n="Analytics">Dashboard</div>
+                      <a href="student.php" class="menu-link">
+                        <div data-i18n="Analytics">Student</div>
                       </a>
                     </li>
                     <li class="menu-item">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-user-circle"></i>
-                            <div data-i18n="Layouts">User</div>
-                        </a>
-                        <ul class="menu-sub">
-                            <li class="menu-item">
-                              <a href="student.php" class="menu-link">
-                                <div data-i18n="Analytics">Student</div>
-                              </a>
-                            </li>
-                            <li class="menu-item">
-                              <a href="employee.php" class="menu-link">
-                                <div data-i18n="Analytics">Employee</div>
-                              </a>
-                            </li>
-                        </ul>
+                      <a href="employee.php" class="menu-link">
+                        <div data-i18n="Analytics">Employee</div>
+                      </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="menu-item active">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-calendar-check"></i>
+                    <div data-i18n="Analytics">Attendance</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item">
+                      <a href="attendance_gate.php" class="menu-link">
+                        <div data-i18n="Analytics">Gate Marking</div>
+                      </a>
                     </li>
                     <li class="menu-item active">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-calendar-check"></i>
-                            <div data-i18n="Analytics">Attendance</div>
-                        </a>
-                        <ul class="menu-sub">
-                            <li class="menu-item">
-                              <a href="attendance_gate.php" class="menu-link">
-                                <div data-i18n="Analytics">Gate Marking</div>
-                              </a>
-                            </li>
-                            <li class="menu-item active">
-                              <a href="employee_attendance_information_flag.php" class="menu-link">
-                                <div data-i18n="Analytics">Flag Ceremony</div>
-                              </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <!-- <li class="menu-item">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-calendar-event"></i>
-                            <div data-i18n="Layouts">Event</div>
-                        </a>
-                        <ul class="menu-sub">
-                            <li class="menu-item">
-                              <a href="create_event.php" class="menu-link">
-                                <div data-i18n="Analytics">Create Event</div>
-                              </a>
-                            </li>
-                            <li class="menu-item">
-                              <a href="archive_event.php" class="menu-link">
-                                <div data-i18n="Analytics">Archive Event</div>
-                              </a>
-                            </li>
-                        </ul>
-                    </li> -->
-                    <li class="menu-item">
-                      <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <i class="menu-icon tf-icons bx bx-printer"></i>
-                        <div data-i18n="Analytics">Print</div>
+                      <a href="employee_attendance_information_flag.php" class="menu-link">
+                        <div data-i18n="Analytics">Flag Ceremony</div>
                       </a>
-                      <ul class="menu-sub">
-                        <li class="menu-item">
-                          <a href="print/print_flag.php" class="menu-link">
-                            <div data-i18n="Analytics">Flag Ceremony Record</div>
-                          </a>
-                        </li>
-                        <li class="menu-item">
-                          <a href="print/print_gate.php" class="menu-link">
-                            <div data-i18n="Analytics">Gate Marking Record</div>
-                          </a>
-                        </li>
-                      </ul>
                     </li>
-            
+                </ul>
+            </li>
+            <!-- <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-calendar-event"></i>
+                    <div data-i18n="Layouts">Event</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item">
+                      <a href="create_event.php" class="menu-link">
+                        <div data-i18n="Analytics">Create Event</div>
+                      </a>
+                    </li>
+                    <li class="menu-item">
+                      <a href="archive_event.php" class="menu-link">
+                        <div data-i18n="Analytics">Archive Event</div>
+                      </a>
+                    </li>
+                </ul>
+            </li> -->
+            <li class="menu-item">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-printer"></i>
+                <div data-i18n="Analytics">Print</div>
+              </a>
+              <ul class="menu-sub">
+                <li class="menu-item">
+                  <a href="print/print_flag.php" class="menu-link">
+                    <div data-i18n="Analytics">Flag Ceremony of Employee</div>
+                  </a>
+                </li>
+                <li class="menu-item">
+                  <a href="print/print_flag_student.php" class="menu-link">
+                    <div data-i18n="Analytics">Flag Ceremony of Student</div>
+                  </a>
+                </li>
+                <li class="menu-item">
+                  <a href="print/print_gate.php" class="menu-link">
+                    <div data-i18n="Analytics">Gate Marking Record</div>
+                  </a>
+                </li>
+              </ul>
+            </li>
+    
         </aside>
         <!-- / Menu -->
 
@@ -350,21 +387,32 @@ $result = $stmt->get_result();
                       </div>
                       <div class="col">
                         <div class="row justify-content-start align-items-start">
-                          <div class="col-lg-5 mb-3 text-start">
-                            <div class="d-flex align-items-center mb-3 justify-content-between">
-                                <a href="assign_employee.php" class="btn btn-primary flex-grow-1 me-2">Assign Employee for Attendance</a>
-                                <a href="attendance_flag_history.php" class="btn btn-primary">History</a>
-                            </div>
-                            <div class="d-flex align-items-center mb-3 justify-content-between">
-                                <a href="assign_employee_department.php" class="btn btn-primary flex-grow-1 me-2">Assign Employee for Department</a>
-                                <a href="attendance_flag_history_department.php" class="btn btn-primary">History</a>
-                            </div>
-                            <div class="d-flex align-items-center justify-content-between">
-                                <a href="assign_student.php" class="btn btn-primary flex-grow-1 me-2">Assign Student for Attendance</a>
-                                <a href="attendance_flag_history_student.php" class="btn btn-primary">History</a>
-                            </div>
-                        </div>
-
+                          <div class="col">
+    <div class="row justify-content-start align-items-start">
+        <div class="col-lg-5 mb-3 text-start">
+            <!-- Dropdown for Assign Options -->
+            <div class="dropdown mb-3">
+                <button class="btn btn-primary dropdown-toggle w-100" type="button" id="assignDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    Assign Options
+                </button>
+                <ul class="dropdown-menu w-100 custom-dropdown-menu" aria-labelledby="assignDropdown">
+                    <li class="dropdown-item custom-dropdown-item d-flex align-items-center justify-content-between">
+                        <a href="assign_employee.php" class="assign-link">Assign Employee for Attendance</a>
+                        <a href="attendance_flag_history.php" class="btn btn-secondary btn-sm">History</a>
+                    </li>
+                    <li class="dropdown-item custom-dropdown-item d-flex align-items-center justify-content-between">
+                        <a href="assign_employee_department.php" class="assign-link">Assign Employee for Department</a>
+                        <a href="attendance_flag_history_department.php" class="btn btn-secondary btn-sm">History</a>
+                    </li>
+                    <li class="dropdown-item custom-dropdown-item d-flex align-items-center justify-content-between">
+                        <a href="assign_student.php" class="assign-link">Assign Student for Attendance</a>
+                        <a href="attendance_flag_history_student.php" class="btn btn-secondary btn-sm">History</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
 
                       </div>
                       <div class="table-responsive">

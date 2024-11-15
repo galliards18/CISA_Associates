@@ -164,8 +164,13 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                         <ul class="menu-sub">
                             <li class="menu-item">
                                 <a href="print/print_flag.php" class="menu-link">
-                                    <div data-i18n="Analytics">Flag Ceremony Record</div>
+                                    <div data-i18n="Analytics">Flag Ceremony of Employee</div>
                                 </a>
+                            </li>
+                            <li class="menu-item">
+                              <a href="print/print_flag_student.php" class="menu-link">
+                                <div data-i18n="Analytics">Flag Ceremony of Student</div>
+                              </a>
                             </li>
                             <li class="menu-item">
                                 <a href="print/print_gate.php" class="menu-link">
@@ -247,6 +252,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                                                             <button class="btn btn-primary" type="submit">Search</button>
                                                         </div>
                                                     </form>
+                                                    <button class="btn btn-primary mb-2"><a href="student_registration.php">Add New Student</a></button>
                                                     <div class="table-responsive">
                                                         <table class="table table-bordered table-striped">
                                                             <thead>
@@ -291,7 +297,6 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                                                     <div class="text-center mt-3">
                                                         <p>Total Employees Available: <?php echo isset($totalItems) ? $totalItems : '0'; ?></p>
                                                     </div>
-                                                    <button class="btn btn-primary mt-2"><a href="student_registration.php">Add New Student</a></button>
                                                 </div>
                                             </div>
                                         </div>

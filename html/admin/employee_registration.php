@@ -130,85 +130,90 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
           <ul class="menu-inner py-1">
             <!-- Dashboard -->
+            <li class="menu-item">
+              <a href="dashboard.php" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-chalkboard"></i>
+                <div data-i18n="Analytics">Dashboard</div>
+              </a>
+            </li>
+            <li class="menu-item active">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-user-circle"></i>
+                    <div data-i18n="Layouts">User</div>
+                </a>
+                <ul class="menu-sub">
                     <li class="menu-item">
-                      <a href="dashboard.php" class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-chalkboard"></i>
-                        <div data-i18n="Analytics">Dashboard</div>
+                      <a href="student.php" class="menu-link">
+                        <div data-i18n="Analytics">Student</div>
                       </a>
                     </li>
                     <li class="menu-item active">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-user-circle"></i>
-                            <div data-i18n="Layouts">User</div>
-                        </a>
-                        <ul class="menu-sub">
-                            <li class="menu-item">
-                              <a href="student.php" class="menu-link">
-                                <div data-i18n="Analytics">Student</div>
-                              </a>
-                            </li>
-                            <li class="menu-item active">
-                              <a href="employee.php" class="menu-link">
-                                <div data-i18n="Analytics">Employee</div>
-                              </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="menu-item">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-calendar-check"></i>
-                            <div data-i18n="Analytics">Attendance</div>
-                        </a>
-                        <ul class="menu-sub">
-                            <li class="menu-item">
-                              <a href="attendance_gate.php" class="menu-link">
-                                <div data-i18n="Analytics">Gate Marking</div>
-                              </a>
-                            </li>
-                            <li class="menu-item">
-                              <a href="employee_attendance_information_flag.php" class="menu-link">
-                                <div data-i18n="Analytics">Flag Ceremony</div>
-                              </a>
-                            </li>
-                        </ul>
-                    </li>
-<!--                     <li class="menu-item">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-calendar-event"></i>
-                            <div data-i18n="Layouts">Event</div>
-                        </a>
-                        <ul class="menu-sub">
-                            <li class="menu-item">
-                              <a href="create_event.php" class="menu-link">
-                                <div data-i18n="Analytics">Create Event</div>
-                              </a>
-                            </li>
-                            <li class="menu-item">
-                              <a href="archive_event.php" class="menu-link">
-                                <div data-i18n="Analytics">Archive Event</div>
-                              </a>
-                            </li>
-                        </ul>
-                    </li> -->
-                    <li class="menu-item">
-                      <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <i class="menu-icon tf-icons bx bx-printer"></i>
-                        <div data-i18n="Analytics">Print</div>
+                      <a href="employee.php" class="menu-link">
+                        <div data-i18n="Analytics">Employee</div>
                       </a>
-                      <ul class="menu-sub">
-                        <li class="menu-item">
-                          <a href="print/print_flag.php" class="menu-link">
-                            <div data-i18n="Analytics">Flag Ceremony Record</div>
-                          </a>
-                        </li>
-                        <li class="menu-item">
-                          <a href="print/print_gate.php" class="menu-link">
-                            <div data-i18n="Analytics">Gate Marking Record</div>
-                          </a>
-                        </li>
-                      </ul>
                     </li>
-                  </ul>
+                </ul>
+            </li>
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-calendar-check"></i>
+                    <div data-i18n="Analytics">Attendance</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item">
+                      <a href="attendance_gate.php" class="menu-link">
+                        <div data-i18n="Analytics">Gate Marking</div>
+                      </a>
+                    </li>
+                    <li class="menu-item">
+                      <a href="employee_attendance_information_flag.php" class="menu-link">
+                        <div data-i18n="Analytics">Flag Ceremony</div>
+                      </a>
+                    </li>
+                </ul>
+            </li>
+<!--                     <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-calendar-event"></i>
+                    <div data-i18n="Layouts">Event</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item">
+                      <a href="create_event.php" class="menu-link">
+                        <div data-i18n="Analytics">Create Event</div>
+                      </a>
+                    </li>
+                    <li class="menu-item">
+                      <a href="archive_event.php" class="menu-link">
+                        <div data-i18n="Analytics">Archive Event</div>
+                      </a>
+                    </li>
+                </ul>
+            </li> -->
+            <li class="menu-item">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-printer"></i>
+                <div data-i18n="Analytics">Print</div>
+              </a>
+              <ul class="menu-sub">
+                <li class="menu-item">
+                  <a href="print/print_flag.php" class="menu-link">
+                    <div data-i18n="Analytics">Flag Ceremony of Employee</div>
+                  </a>
+                </li>
+                <li class="menu-item">
+                  <a href="print/print_flag_student.php" class="menu-link">
+                    <div data-i18n="Analytics">Flag Ceremony of Student</div>
+                  </a>
+                </li>
+                <li class="menu-item">
+                  <a href="print/print_gate.php" class="menu-link">
+                    <div data-i18n="Analytics">Gate Marking Record</div>
+                  </a>
+                </li>
+              </ul>
+            </li>
+          </ul>
         </aside>
         <!-- / Menu -->
 

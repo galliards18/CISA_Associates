@@ -189,7 +189,12 @@ $conn->close();
               <ul class="menu-sub">
                 <li class="menu-item">
                   <a href="print/print_flag.php" class="menu-link">
-                    <div data-i18n="Analytics">Flag Ceremony Record</div>
+                    <div data-i18n="Analytics">Flag Ceremony of Employee</div>
+                  </a>
+                </li>
+                <li class="menu-item">
+                  <a href="print/print_flag_student.php" class="menu-link">
+                    <div data-i18n="Analytics">Flag Ceremony of Student</div>
                   </a>
                 </li>
                 <li class="menu-item">
