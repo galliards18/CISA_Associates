@@ -23,7 +23,6 @@ function sanitize_input($data) {
 
 // Initialize variables
 $date = '';
-$department = '';
 $whereClause = '';
 $searchMessage = '';
 
@@ -31,56 +30,29 @@ $searchMessage = '';
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['date'])) {
         $date = sanitize_input($_POST['date']);
-    }
-    
-    if (isset($_POST['department'])) {
-        $department = sanitize_input($_POST['department']);
-    }
 
-    // Build WHERE clause based on filters
-    $conditions = [];
-    if ($date) {
-        $conditions[] = "DATE(f.attendance_date) = ?";
-    }
-    if ($department) {
-        $conditions[] = "e.department = ?";
-    }
-
-    if (count($conditions) > 0) {
-        $whereClause = "WHERE " . implode(" AND ", $conditions);
-        $searchMessage = "Showing results";
+        // Validate date format
         if ($date) {
-            $searchMessage .= " for date: $date";
-        }
-        if ($department) {
-            $searchMessage .= " and department: $department";
+            $whereClause = "WHERE DATE(f.attendance_date) = ?";
+            $searchMessage = "Showing results for date: $date";
         }
     }
 }
 
-// SQL query with filters
-$sql = "SELECT e.first_name, e.last_name, e.department, DATE(f.attendance_date) AS attendance_date, f.attendance_status, ft.flag_type
+// SQL query with date filter
+$sql = "SELECT e.first_name, e.last_name, DATE(f.attendance_date) AS attendance_date, f.attendance_status, ft.flag_type
         FROM employee_registration e
-        INNER JOIN employee_attendance_department f ON e.employee_id = f.employee_id
+        INNER JOIN employee_attendance_flag f ON e.employee_id = f.employee_id
         INNER JOIN flag_type ft ON f.flag_id = ft.flag_id
         $whereClause
         ORDER BY f.attendance_date DESC";
 
+
+
 $stmt = $conn->prepare($sql);
 
-$types = '';
-$params = [];
-if ($date) {
-    $types .= 's'; // Add type specifier for date
-    $params[] = $date;
-}
-if ($department) {
-    $types .= 's'; // Add type specifier for department
-    $params[] = $department;
-}
-
-if ($types) {
-    $stmt->bind_param($types, ...$params);
+if ($whereClause) {
+    $stmt->bind_param("s", $date);
 }
 
 $stmt->execute();
@@ -131,7 +103,6 @@ $result = $stmt->get_result();
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="../../assets/js/config.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-
     <style>
         body, .btn, .navbar-nav .nav-link, .dropdown-item, .card-title, h4, th, td, .form-control {
             font-family: 'Poppins', sans-serif;
@@ -191,41 +162,42 @@ $result = $stmt->get_result();
             color: red;
             font-weight: bold;
         }
-      
-        tr.in {
-            background-color: #dff0d8; /* Light green background for 'In' */
-        }
 
+        tr.in {
+            background-color: #dff0d8;
+
+        }
         tr.out {
-            background-color: #f8d7da; /* Light red background for 'Out' */
+            background-color: #f8d7da;
+
         }
 
         .entry-type-in {
-            color: green; /* Green text color for 'In' */
+            color: green;
         }
         .entry-type-out {
-            color: red; /* Red text color for 'Out' */
+            color: red;
         }
 
         .custom-outline-button {
-            border: 2px solid #007bff; /* Outline color and thickness */
-            background-color: transparent; /* Transparent background */
-            color: #007bff; /* Text color matching the outline */
-            padding: 10px 20px; /* Padding inside the button */
-            font-size: 16px; /* Font size */
-            border-radius: 5px; /* Rounded corners */
-            cursor: pointer; /* Pointer cursor on hover */
-            transition: all 0.3s ease; /* Smooth transition for hover effects */
+            border: 2px solid #007bff;
+            background-color: transparent;
+            color: #007bff;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
         .custom-outline-button:hover {
-            background-color: #007bff; /* Blue background on hover */
-            color: white; /* White text on hover */
+            background-color: #007bff;
+            color: white;
         }
 
         .custom-outline-button:focus {
-            outline: none; /* Remove default focus outline */
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Custom focus effect */
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
         }
     </style>
 </head>
@@ -392,22 +364,14 @@ $result = $stmt->get_result();
                     <!-- Content -->
                     <div class="container-xxl flex-grow-1 container-p-y">
                         <!-- Search Form -->
-                        <form method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>" class="d-flex mb-3">
-                            <input type="date" name="date" id="date" class="form-control me-2" aria-label="Search" value="<?php echo htmlspecialchars($date); ?>">
-                            <select name="department" id="department" class="form-control me-2">
-                                <option value="">Select Department</option>
-                                <?php
-                                // Fetch departments from the database, excluding 'admin'
-                                $departmentQuery = "SELECT DISTINCT department FROM employee_registration WHERE department != 'admin'";
-                                $departmentResult = $conn->query($departmentQuery);
-                                while ($dept = $departmentResult->fetch_assoc()) {
-                                    $selected = ($department === $dept['department']) ? 'selected' : '';
-                                    echo "<option value=\"" . htmlspecialchars($dept['department']) . "\" $selected>" . htmlspecialchars($dept['department']) . "</option>";
-                                }
-                                ?>
-                            </select>
-                        <button type="submit" class="custom-outline-button">Search</button>
-                        </form>
+                        <div class="row mb-3">
+                            <div class="col-lg-12">
+                                <form method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>" class="d-flex">
+                                    <input type="date" name="date" id="date" class="form-control me-2" aria-label="Search" value="<?php echo htmlspecialchars($date); ?>">
+                                    <button type="submit" class="custom-outline-button">Search</button>
+                                </form>
+                            </div>
+                        </div>
                         <!-- / Search Form -->
                         <div class="row">
                             <div class="col-lg-12 mb-4 order-0">
@@ -419,6 +383,7 @@ $result = $stmt->get_result();
                                                     <div class="col-lg-12 mb-4 order-0">
                                                         <div class="card-header">
                                                             <h2 class="mb-3">Attendance Flag Ceremony History</h2>
+                                                            <!-- Display message if date range is used for filtering -->
                                                             <?php if ($searchMessage): ?>
                                                                 <h4><?php echo $searchMessage; ?></h4>
                                                             <?php endif; ?>
@@ -432,7 +397,6 @@ $result = $stmt->get_result();
                                                                             <th>Employee Name</th>
                                                                             <th>Attendance Date</th>
                                                                             <th>Status</th>
-                                                                            <th>Department</th>
                                                                             <th>Flag Ceremony Type</th>
                                                                         </tr>
                                                                     </thead>
@@ -465,16 +429,14 @@ $result = $stmt->get_result();
                                                                             <td><?php echo htmlspecialchars($row['first_name'] . ' ' . $row['last_name']); ?></td>
                                                                             <td><?php echo htmlspecialchars($row['attendance_date']); ?></td>
                                                                             <td><?php echo ucfirst(htmlspecialchars($row['attendance_status'])); ?></td>
-                                                                            <td><?php echo htmlspecialchars($row['department']); ?></td>
                                                                             <td><?php echo ucfirst(htmlspecialchars($row['flag_type'])); ?></td>
                                                                         </tr>
-                                                                        <?php
-                                                                            }
-                                                                        ?>
+                                                                          <?php
+                                                                                }
+                                                                            ?>
                                                                     </tbody>
                                                                 </table>
                                                             </div>
-                                                            <!-- After the table in your existing code -->
                                                             <div class="centered-button">
                                                                 <a href="attendance_flag.php" class="btn btn-primary">
                                                                     <i class="bx bx-chevron-left"></i> Back

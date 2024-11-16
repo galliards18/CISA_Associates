@@ -73,17 +73,13 @@ $stmt->bind_param("sss", $search_term, $search_term, $search_term);
 $stmt->execute();
 $result = $stmt->get_result();
 ?>
+
 <!DOCTYPE html>
-<html lang="en" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../../assets/" data-template="vertical-menu-template-free">
+<html lang="en" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free">
 <head>
     <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
-    />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
     <title>Attendance Monitoring System</title>
-
     <meta name="description" content="" />
 
     <!-- Favicon -->
@@ -95,10 +91,11 @@ $result = $stmt->get_result();
     <!-- SweetAlert JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" />
+
     <!-- Link Poppins font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -112,10 +109,7 @@ $result = $stmt->get_result();
 
     <!-- Vendors CSS -->
     <link rel="stylesheet" href="../../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
-
     <link rel="stylesheet" href="../../assets/vendor/libs/apex-charts/apex-charts.css" />
-
-    <!-- Page CSS -->
 
     <!-- Helpers -->
     <script src="../../assets/vendor/js/helpers.js"></script>
@@ -123,8 +117,8 @@ $result = $stmt->get_result();
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="../../assets/js/config.js"></script>
-
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
     <script>
         $(document).ready(function() {
             // AJAX function to assign employee and update UI
@@ -193,10 +187,6 @@ $result = $stmt->get_result();
             });
         });
     </script>
-
-
-
-    <!-- Apply Poppins font globally -->
     <style>
         body, .btn, .menu-link, .navbar-nav-right, .footer, .app-brand, .queue-number {
             font-family: 'Poppins', sans-serif;
@@ -238,46 +228,40 @@ $result = $stmt->get_result();
             margin-top: 20px;
         }
 
-            /* Ensure the card maintains its style and size even when wrapped in a link */
-            .card-link {
-                text-decoration: none; /* Remove underline from the link */
-                color: inherit; /* Inherit text color */
-                display: block; /* Make the link block to cover the entire card */
-            }
-        </style>
-        <style>
-            .badge.badge-danger {
-                color: #fff; /* Set text color to white */
-                background-color: #dc3545; /* Set background color to red */
-                display: inline-block;
-                padding: 0.35em 0.65em;
-                font-size: 0.75em;
-                font-weight: 700;
-                line-height: 1;
-                text-align: center;
-                white-space: nowrap;
-                vertical-align: baseline;
-                border-radius: 0.25rem;
-            }
-        </style>
-        <style>
-            .alert-success {
-                color: #155724; /* Text color */
-                background-color: #d4edda; /* Background color */
-                border-color: #c3e6cb; /* Border color */
-                padding: 10px;
-                margin-top: 10px;
-            }
-        </style>
-        <style>
-    .success-message {
-        color: #28a745; /* Green color for success */
-        font-weight: bold;
-    }
-</style>
+        .card-link {
+            text-decoration: none; /* Remove underline from the link */
+            color: inherit; /* Inherit text color */
+            display: block; /* Make the link block to cover the entire card */
+        }
 
+        .badge.badge-danger {
+            color: #fff; /* Set text color to white */
+            background-color: #dc3545; /* Set background color to red */
+            display: inline-block;
+            padding: 0.35em 0.65em;
+            font-size: 0.75em;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 0.25rem;
+        }
+
+        .alert-success {
+            color: #155724; /* Text color */
+            background-color: #d4edda; /* Background color */
+            border-color: #c3e6cb; /* Border color */
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .success-message {
+            color: #28a745; /* Green color for success */
+            font-weight: bold;
+        }
+    </style>
 </head>
-
 <body>
     <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
@@ -287,16 +271,14 @@ $result = $stmt->get_result();
                 <div class="app-brand demo" style="padding: 70px;">
                     <div class="logo">
                         <img style="border-radius: 500px; box-shadow: 2px 2px 20px #00008b; margin-top: 30px; margin-bottom: 5px;" src="../../assets/img/avatars/logo.png" width="100" height="100" alt="">
-                        <b><p style="font-size: 20px; color: blue; text-shadow: 2px 2px 50px #00008b; padding-left: 18px;">S L S U</p></b>
+                        <b>
+                            <p style="font-size: 20px; color: blue; text-shadow: 2px 2px 50px #00008b; padding-left: 18px;">S L S U</p>
+                        </b>
                     </div>
-
-                    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
-                        <i class="bx bx-chevron-left bx-sm align-middle"></i>
-                    </a>
+                        <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
+                            <i class="bx bx-chevron-left bx-sm align-middle"></i>
+                        </a>
                 </div>
-
-                <div class="menu-inner-shadow"></div>
-
                 <ul class="menu-inner py-1">
                     <!-- Dashboard -->
                     <li class="menu-item">
@@ -335,7 +317,7 @@ $result = $stmt->get_result();
                                 </a>
                             </li>
                             <li class="menu-item active">
-                                <a href="employee_attendance_information_flag.php" class="menu-link">
+                                <a href="attendance_flag.php" class="menu-link">
                                     <div data-i18n="Analytics">Flag Ceremony</div>
                                 </a>
                             </li>
@@ -363,7 +345,7 @@ $result = $stmt->get_result();
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-printer"></i>
                             <div data-i18n="Analytics">Print</div>
-                        </a>
+                         </a>
                         <ul class="menu-sub">
                             <li class="menu-item">
                                 <a href="print/print_flag.php" class="menu-link">
@@ -371,9 +353,9 @@ $result = $stmt->get_result();
                                 </a>
                             </li>
                             <li class="menu-item">
-                              <a href="print/print_flag_student.php" class="menu-link">
-                                <div data-i18n="Analytics">Flag Ceremony of Student</div>
-                              </a>
+                                <a href="print/print_flag_student.php" class="menu-link">
+                                    <div data-i18n="Analytics">Flag Ceremony of Student</div>
+                                </a>
                             </li>
                             <li class="menu-item">
                                 <a href="print/print_gate.php" class="menu-link">
@@ -389,27 +371,23 @@ $result = $stmt->get_result();
             <!-- Layout container -->
             <div class="layout-page">
                 <!-- Navbar -->
-                <nav
-                    class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
-                    id="layout-navbar"
-                >
+                <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
                     <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
                         <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
                             <i class="bx bx-menu bx-sm"></i>
                         </a>
                     </div>
-
                     <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
-                        <center> 
-                            <p style="font-size: 18px; padding-top: 15px;"><b>Southern Leyte State University</b></p>  
+                        <center>
+                            <p style="font-size: 18px; padding-top: 15px;"><b>Southern Leyte State University</b></p>
                         </center>
-
                         <ul class="navbar-nav flex-row align-items-center ms-auto">
+                            <!-- Place this tag where you want the button to render. -->
                             <!-- User -->
                             <li class="nav-item navbar-dropdown dropdown-user dropdown">
                                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                                     <div class="avatar avatar-online">
-                                        <img src="../../assets/img/avatars/user.png" alts class="w-px-40 h-auto rounded-circle" />
+                                        <img src="../../assets/img/avatars/user.png" alt="" class="w-px-40 h-auto rounded-circle" />
                                     </div>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
@@ -418,7 +396,7 @@ $result = $stmt->get_result();
                                             <div class="d-flex">
                                                 <div class="flex-shrink-0 me-3">
                                                     <div class="avatar avatar-online">
-                                                        <img src="../../assets/img/avatars/user.png" alt class="w-px-40 h-auto rounded-circle" />
+                                                        <img src="../../assets/img/avatars/user.png" alt="" class="w-px-40 h-auto rounded-circle" />
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1">
@@ -448,11 +426,11 @@ $result = $stmt->get_result();
                     <div class="container-xxl flex-grow-1 container-p-y">
                         <div class="row mb-3">
                             <div class="col-lg-12">
-                              <form class="d-flex" method="GET" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
-                                <input class="form-control me-2" type="search" id="searchInput" placeholder="Search by Name" aria-label="Search" name="search" value="<?php echo htmlspecialchars($search); ?>">
-                              </form>
+                                <form class="d-flex" method="GET" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+                                    <input class="form-control me-2" type="search" id="searchInput" placeholder="Search by Name" aria-label="Search" name="search" value="<?php echo htmlspecialchars($search); ?>">
+                                </form>
                             </div>
-                          </div>
+                        </div>
                         <div class="row">
                             <div class="col-lg-12 mb-4 order-0">
                                 <div class="card">
@@ -461,14 +439,13 @@ $result = $stmt->get_result();
                                         <div id="message" class="alert alert-success" role="alert" style="display: none;"></div>
                                         <button id="resetButton" class="btn btn-danger mb-4">Reset Assignments</button>
                                         <div class="table-responsive">
-                                        <table class="table table-striped">
+                                            <table class="table table-striped">
                                                 <thead>
                                                     <tr>
                                                         <th>#</th>
                                                         <th>Action</th>
                                                         <th>First Name</th>
                                                         <th>Last Name</th>
-                                                        <th>Email</th>
                                                         <th>Department</th>
                                                         <th>Section</th>
                                                     </tr>
@@ -489,7 +466,6 @@ $result = $stmt->get_result();
                                                             echo "</td>";
                                                             echo "<td>{$row['first_name']}</td>";
                                                             echo "<td>{$row['last_name']}</td>";
-                                                            echo "<td>{$row['email']}</td>";
                                                             echo "<td>{$row['department']}</td>";
                                                             echo "<td>{$row['section']}</td>";
                                                             echo "</tr>";
@@ -501,44 +477,39 @@ $result = $stmt->get_result();
                                                     ?>
                                                 </tbody>
                                             </table>
-                                    </div>
-                                            <!-- After the table in your existing code -->
-                                  <div class="centered-button">
-                                    <a href="employee_attendance_information_flag.php" class="btn btn-primary">
-                                      <i class="bx bx-chevron-left"></i> Back
-                                    </a>
-                                  </div>
+                                        </div>
+                                        <div class="centered-button">
+                                            <a href="attendance_flag.php" class="btn btn-primary">
+                                                <i class="bx bx-chevron-left"></i> Back
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <!-- Footer -->
-                    <footer class="content-footer footer bg-footer-theme">
-                        <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
-                            <div class="mb-2 mb-md-0">
-                                ©
-                                <script>
-                                    document.write(new Date().getFullYear());
-                                </script>
-                                , made with ❤️ by
-                                <a href="https://www.facebook.com/james.jeager.3" target="_blank" class="footer-link fw-bolder">MeProfile</a>
-                            </div>
-                        </div>
-                    </footer>
-                    <!-- / Footer -->
-
-                    <div class="content-backdrop fade"></div>
+                    <!-- / Content -->
                 </div>
-                <!-- Content wrapper -->
+                <!-- / Content wrapper -->
+
+                <!-- Footer -->
+                <footer class="content-footer footer bg-footer-theme">
+                    <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
+                        <div class="mb-2 mb-md-0">
+                            ©
+                            <script>
+                                document.write(new Date().getFullYear());
+                            </script>, made with ❤️ by
+                            <a href="https://www.facebook.com/james.jeager.3" target="_blank" class="footer-link fw-bolder">MeProfile</a>
+                        </div>
+                    </div>
+                </footer>
+                <!-- / Footer -->
             </div>
             <!-- / Layout page -->
         </div>
-
-        <!-- Overlay -->
-        <div class="layout-overlay layout-menu-toggle"></div>
     </div>
+    <!-- / Layout wrapper -->
 
     <!-- Core JS -->
     <!-- build:js assets/vendor/js/core.js -->
@@ -546,7 +517,6 @@ $result = $stmt->get_result();
     <script src="../../assets/vendor/libs/popper/popper.js"></script>
     <script src="../../assets/vendor/js/bootstrap.js"></script>
     <script src="../../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-
     <script src="../../assets/vendor/js/menu.js"></script>
     <!-- endbuild -->
 
@@ -557,12 +527,13 @@ $result = $stmt->get_result();
     <script src="../../assets/js/main.js"></script>
 
     <!-- Page JS -->
-    <script src="../../assets/js/dashboards-analytics.js"></script>
+    <script src="../../assets/js/pages-account-settings-account.js"></script>
 
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>
 </html>
+
 <?php
 // Close connection
 $conn->close();

@@ -1,9 +1,9 @@
 <?php
 session_start();
 
-// Check if user is not logged in or is not a student
-if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'student') {
-    header("Location: ../choose.php"); // Redirect to login page if not logged in as student
+// Check if user is not logged in or is not an admin
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+    header("Location: ../choose.php"); // Redirect to login page if not logged in as admin
     exit();
 }
 
@@ -18,25 +18,10 @@ function sanitize_input($data) {
     return $data;
 }
 
-// Get the student ID from the session
-$student_id = $_SESSION['student_id'];
+// Get the employee ID from the session
+$employee_id = $_SESSION['employee_id'];
 
-// Fetch the department of the logged-in student
-$departmentSql = "SELECT department FROM student_registration WHERE student_id = ?";
-$departmentStmt = $conn->prepare($departmentSql);
-$departmentStmt->bind_param("i", $student_id);
-$departmentStmt->execute();
-$departmentResult = $departmentStmt->get_result();
-
-if ($departmentResult->num_rows > 0) {
-    $departmentRow = $departmentResult->fetch_assoc();
-    $userDepartment = $departmentRow['department'];
-} else {
-    echo json_encode(array('status' => 'error', 'message' => 'Department not found'));
-    exit();
-}
-
-// Fetch students based on search criteria
+// Fetch employees based on search criteria
 $search = '';
 $search_param1 = '';
 $search_param2 = '';
@@ -44,33 +29,31 @@ $search_param2 = '';
 if (isset($_GET['search']) && !empty($_GET['search'])) {
     // Sanitize search input
     $search = sanitize_input($_GET['search']);
-    $sql = "SELECT s.student_id, s.first_name, s.last_name, s.department, COALESCE(f.attendance_status, 'no record') AS attendance_status
-            FROM student_registration s
+    $sql = "SELECT e.employee_id, e.first_name, e.last_name, COALESCE(f.attendance_status, 'no record') AS attendance_status
+            FROM employee_registration e
             LEFT JOIN (
-                SELECT student_id, MAX(attendance_date) AS max_date
-                FROM student_attendance_flag
+                SELECT employee_id, MAX(attendance_date) AS max_date
+                FROM employee_attendance_flag
                 WHERE DATE(attendance_date) = CURDATE()
-                GROUP BY student_id
-            ) af ON s.student_id = af.student_id
-            LEFT JOIN student_attendance_flag f ON af.student_id = f.student_id AND af.max_date = f.attendance_date
-            WHERE (s.first_name LIKE ? OR s.last_name LIKE ?) AND s.department = ?";
+                GROUP BY employee_id
+            ) af ON e.employee_id = af.employee_id
+            LEFT JOIN employee_attendance_flag f ON af.employee_id = f.employee_id AND af.max_date = f.attendance_date
+            WHERE e.first_name LIKE ? OR e.last_name LIKE ?";
     $stmt = $conn->prepare($sql);
     $search_param1 = "%" . $search . "%";
     $search_param2 = "%" . $search . "%";
-    $stmt->bind_param("sss", $search_param1, $search_param2, $userDepartment);
+    $stmt->bind_param("ss", $search_param1, $search_param2);
 } else {
-    $sql = "SELECT s.student_id, s.first_name, s.last_name, s.department, COALESCE(f.attendance_status, 'no record') AS attendance_status
-            FROM student_registration s
+    $sql = "SELECT e.employee_id, e.first_name, e.last_name, COALESCE(f.attendance_status, 'no record') AS attendance_status
+            FROM employee_registration e
             LEFT JOIN (
-                SELECT student_id, MAX(attendance_date) AS max_date
-                FROM student_attendance_flag
+                SELECT employee_id, MAX(attendance_date) AS max_date
+                FROM employee_attendance_flag
                 WHERE DATE(attendance_date) = CURDATE()
-                GROUP BY student_id
-            ) af ON s.student_id = af.student_id
-            LEFT JOIN student_attendance_flag f ON af.student_id = f.student_id AND af.max_date = f.attendance_date
-            WHERE s.department = ?";
+                GROUP BY employee_id
+            ) af ON e.employee_id = af.employee_id
+            LEFT JOIN employee_attendance_flag f ON af.employee_id = f.employee_id AND af.max_date = f.attendance_date";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $userDepartment);
 }
 
 // Execute the statement and get the result set
@@ -129,7 +112,68 @@ $result = $stmt->get_result();
     <script src="../../assets/js/config.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
+    <script>
+        function fetchEmployees() {
+            var department = document.getElementById("department").value;
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "fetch_employees.php?department=" + encodeURIComponent(department), true);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    document.getElementById("employeeList").innerHTML = xhr.responseText;
+                } else {
+                    console.error("Failed to fetch employees");
+                }
+            };
+            xhr.send();
+        }
+
+        function assignEmployee() {
+            var selectedEmployee = document.querySelector('input[name="employee_id"]:checked');
+            if (selectedEmployee) {
+                var employeeId = selectedEmployee.value;
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "assign_employee.php", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        alert(xhr.responseText);
+                        fetchEmployees(); // Refresh the employee list
+                    } else {
+                        console.error("Failed to assign employee");
+                    }
+                };
+                xhr.send("employee_id=" + encodeURIComponent(employeeId));
+            } else {
+                alert("Please select an employee.");
+            }
+        }
+    </script>
     <style>
+        .custom-dropdown-menu {
+            min-width: 100%;
+        }
+
+        .custom-dropdown-item {
+            padding: 8px 15px;
+            font-size: 1rem; 
+        }
+
+        .assign-link {
+            color: #0d6efd;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .btn-secondary.btn-sm {
+            font-size: 0.875rem; 
+            padding: 5px 10px; 
+        }
+
+        .dropdown-toggle {
+            font-size: 1.1rem;
+            padding: 10px 15px;
+        }
+
         body, .navbar, .card, .btn, .form-control, .dropdown-menu, .avatar, .dropdown-item, .navbar-dropdown, .nav-link, .menu-item, .menu-link, .menu-sub, .status-icon {
             font-family: 'Poppins', sans-serif;
         }
@@ -160,19 +204,60 @@ $result = $stmt->get_result();
                             <div data-i18n="Analytics">Dashboard</div>
                         </a>
                     </li>
-                    <li class="menu-item active">
+                    <li class="menu-item">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-user-circle"></i>
-                            <div data-i18n="Layouts">Attendance</div>
+                            <div data-i18n="Layouts">User</div>
                         </a>
                         <ul class="menu-sub">
-                            <li class="menu-item active">
-                                <a href="student_attendance_information_flag.php" class="menu-link">
-                                    <div data-i18n="Analytics">Flag</div>
+                            <li class="menu-item">
+                                <a href="student.php" class="menu-link">
+                                    <div data-i18n="Analytics">Student</div>
+                                </a>
+                            </li>
+                            <li class="menu-item">
+                                <a href="employee.php" class="menu-link">
+                                    <div data-i18n="Analytics">Employee</div>
                                 </a>
                             </li>
                         </ul>
                     </li>
+                    <li class="menu-item active">
+                        <a href="javascript:void(0);" class="menu-link menu-toggle">
+                            <i class="menu-icon tf-icons bx bx-calendar-check"></i>
+                            <div data-i18n="Analytics">Attendance</div>
+                        </a>
+                        <ul class="menu-sub">
+                            <li class="menu-item">
+                                <a href="attendance_gate.php" class="menu-link">
+                                    <div data-i18n="Analytics">Gate Marking</div>
+                                </a>
+                            </li>
+                            <li class="menu-item active">
+                                <a href="attendance_flag.php" class="menu-link">
+                                    <div data-i18n="Analytics">Flag Ceremony</div>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- <li class="menu-item">
+                        <a href="javascript:void(0);" class="menu-link menu-toggle">
+                            <i class="menu-icon tf-icons bx bx-calendar-event"></i>
+                            <div data-i18n="Layouts">Event</div>
+                        </a>
+                        <ul class="menu-sub">
+                            <li class="menu-item">
+                                <a href="create_event.php" class="menu-link">
+                                    <div data-i18n="Analytics">Create Event</div>
+                                </a>
+                            </li>
+                            <li class="menu-item">
+                                <a href="archive_event.php" class="menu-link">
+                                    <div data-i18n="Analytics">Archive Event</div>
+                                </a>
+                            </li>
+                        </ul>
+                    </li> -->
                     <li class="menu-item">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-printer"></i>
@@ -181,9 +266,19 @@ $result = $stmt->get_result();
                         <ul class="menu-sub">
                             <li class="menu-item">
                                 <a href="print/print_flag.php" class="menu-link">
+                                    <div data-i18n="Analytics">Flag Ceremony of Employee</div>
+                                </a>
+                            </li>
+                            <li class="menu-item">
+                                <a href="print/print_flag_student.php" class="menu-link">
                                     <div data-i18n="Analytics">Flag Ceremony of Student</div>
                                 </a>
-                            </li>                        
+                            </li>
+                            <li class="menu-item">
+                                <a href="print/print_gate.php" class="menu-link">
+                                    <div data-i18n="Analytics">Gate Marking Record</div>
+                                </a>
+                            </li>
                         </ul>
                     </li>
                 </ul>
@@ -209,21 +304,21 @@ $result = $stmt->get_result();
                             <li class="nav-item navbar-dropdown dropdown-user dropdown">
                                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                                     <div class="avatar avatar-online">
-                                    <img src="../../assets/img/avatars/profile.png" alts class="w-px-40 h-auto rounded-circle" />
+                                        <img src="../../assets/img/avatars/user.png" alt="" class="w-px-40 h-auto rounded-circle" />
                                     </div>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li>
-                                        <a class="dropdown-item" href="student.php">
+                                        <a class="dropdown-item" href="admin_profile.php">
                                             <div class="d-flex">
                                                 <div class="flex-shrink-0 me-3">
                                                     <div class="avatar avatar-online">
-                                                        <img src="../../assets/img/avatars/profile.png" alt class="w-px-40 h-auto rounded-circle" />
+                                                        <img src="../../assets/img/avatars/user.png" alt="" class="w-px-40 h-auto rounded-circle" />
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1">
                                                     <span class="fw-semibold d-block"></span>
-                                                    <small class="text-muted">Student</small>
+                                                    <small class="text-muted">Admin</small>
                                                 </div>
                                             </div>
                                         </a>
@@ -260,96 +355,115 @@ $result = $stmt->get_result();
                             <div class="col-lg-12 mb-4">
                                 <div class="card">
                                     <div class="card-body">
-                                        <div class="card-body d-flex justify-content-between align-items-center mb-1">
-                                            <h1 class="mb-0">
-                                                <?php
-                                                $today = date('N'); // Get the numeric representation of the day (1 for Monday, ..., 7 for Sunday)
-                                                $flagType = ($today == 5) ? 'Flag Retreat' : 'Flag Raising'; // Check if today is Friday
-                                                echo "Student Attendance: $flagType";
-                                                ?>
-                                            </h1>
+                                        <h1 class="mb-0">
+                                          <?php
+                                          $today = date('N'); // Get the numeric representation of the day (1 for Monday, ..., 7 for Sunday)
+                                          $flagType = ($today == 5) ? 'Flag Retreat' : 'Flag Raising'; // Check if today is Friday
+                                          echo "Employee Attendance: $flagType";
+                                          ?>
+                                        </h1>
+                                    </div>
+                                    <div class="col">
+                                        <div class="row justify-content-start align-items-start p-4">
+                                            <div class="col">
+                                                <div class="row justify-content-start align-items-start">
+                                                    <div class="col-lg-5 mb-0 text-start">
+                                                        <div class="dropdown mb-3">
+                                                            <button class="btn btn-primary dropdown-toggle w-100" type="button" id="assignDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                Assign Options
+                                                            </button>
+                                                            <ul class="dropdown-menu w-100 custom-dropdown-menu" aria-labelledby="assignDropdown">
+                                                                <li class="dropdown-item custom-dropdown-item d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between">
+                                                                    <a href="assign_employee.php" class="assign-link w-100 text-start">Assign Employee for Attendance</a>
+                                                                    <a href="attendance_flag_history_employee.php" class="btn btn-secondary btn-sm mt-2 mt-sm-0">History</a>
+                                                                </li>
+                                                                <li class="dropdown-item custom-dropdown-item d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between">
+                                                                    <a href="assign_employee_department.php" class="assign-link w-100 text-start">Assign Employee for Department</a>
+                                                                    <a href="attendance_flag_history_department.php" class="btn btn-secondary btn-sm mt-2 mt-sm-0">History</a>
+                                                                </li>
+                                                                <li class="dropdown-item custom-dropdown-item d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between">
+                                                                    <a href="assign_student.php" class="assign-link w-100 text-start">Assign Student for Attendance</a>
+                                                                    <a href="attendance_flag_history_student.php" class="btn btn-secondary btn-sm mt-2 mt-sm-0">History</a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="table-responsive">
+                                        <div class="table-responsive p-4">
                                             <table class="table table-bordered table-striped">
                                                 <thead>
                                                     <tr>
                                                         <th>#</th>
-                                                        <th>Attendance</th>
-                                                        <th>First Name</th>
-                                                        <th>Last Name</th>
                                                         <th>Status</th>
+                                                        <th>Attendance</th>
+                                                        <th>Last Name</th>
+                                                        <th>First Name</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody id="studentTableBody">
+                                                <tbody id="employeeTableBody">
                                                     <?php
-                                                    $index = 0; // Initialize index counter
+                                                    $index = 0;
                                                     while ($row = $result->fetch_assoc()) :
-                                                        $index++; // Increment index for each row
+                                                        $index++;
                                                     ?>
-                                                        <tr id="student_<?php echo $row['student_id']; ?>">
-                                                            <td><?php echo $index; ?></td>
-                                                            <!-- Attendance Column -->
-                                                            <td>
-                                                                <form id="attendanceForm_<?php echo $row['student_id']; ?>" class="attendance-form">
-                                                                    <input type="hidden" name="student_id" value="<?php echo $row['student_id']; ?>">
-                                                                    <div class="row g-2">
-                                                                        <div class="col mb-1">
-                                                                            <button type="button" class="btn btn-success btn-sm mark-attendance w-100 mb-0.5" data-status="present">
-                                                                                <span class="d-none d-sm-inline">Present</span>
-                                                                                <span class="d-inline d-sm-none">Present</span>
-                                                                            </button>
-                                                                        </div>
-                                                                        <div class="col mb-1">
-                                                                            <button type="button" class="btn btn-warning btn-sm mark-attendance w-100 mb-0.5" data-status="late">
-                                                                                <span class="d-none d-sm-inline">Late</span>
-                                                                                <span class="d-inline d-sm-none">Late</span>
-                                                                            </button>
-                                                                        </div>
-                                                                        <div class="col mb-1">
-                                                                            <button type="button" class="btn btn-danger btn-sm mark-attendance w-100 mb-1" data-status="absent">
-                                                                                <span class="d-none d-sm-inline">Absent</span>
-                                                                                <span class="d-inline d-sm-none">Absent</span>
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
-                                                                </form>
-                                                            </td>
-                                                            <td><?php echo htmlspecialchars($row['first_name']); ?></td>
-                                                            <td><?php echo htmlspecialchars($row['last_name']); ?></td>
-                                                            <td>
-                                                                <?php
-                                                                $status = htmlspecialchars($row['attendance_status']);
-                                                                $statusClass = '';
-                                                                switch ($status) {
-                                                                    case 'present':
-                                                                        $statusClass = 'text-success'; // Green text for present
-                                                                        break;
-                                                                    case 'late':
-                                                                        $statusClass = 'text-warning'; // Orange text for late
-                                                                        break;
-                                                                    case 'absent':
-                                                                        $statusClass = 'text-danger'; // Red text for absent
-                                                                        break;
-                                                                    default:
-                                                                        $statusClass = 'text-primary'; // Blue text for no record
-                                                                        break;
+                                                    <tr id="employee_<?php echo $row['employee_id']; ?>">
+                                                        <td><?php echo $index; ?></td>
+                                                        <td>
+                                                            <?php
+                                                            $status = htmlspecialchars($row['attendance_status']);
+                                                            $statusClass = '';
+                                                            switch ($status) {
+                                                                case 'present':
+                                                                    $statusClass = 'text-success'; 
+                                                                    break;
+                                                                case 'late':
+                                                                    $statusClass = 'text-warning'; 
+                                                                    break;
+                                                                case 'absent':
+                                                                    $statusClass = 'text-danger'; 
+                                                                    break;
+                                                                default:
+                                                                    $statusClass = 'text-primary';
+                                                                    break;
                                                                 }
-                                                                ?>
-                                                                <span class="<?php echo $statusClass; ?>" id="status_<?php echo $row['student_id']; ?>">
-                                                                    <?php echo ucfirst($status); ?>
-                                                                </span>
-                                                            </td>
-                                                        </tr>
+                                                            ?>
+                                                            <span class="<?php echo $statusClass; ?>" id="status_<?php echo $row['employee_id']; ?>">
+                                                                <?php echo ucfirst($status); ?>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <form id="attendanceForm_<?php echo $row['employee_id']; ?>" class="attendance-form">
+                                                                <input type="hidden" name="employee_id" value="<?php echo $row['employee_id']; ?>">
+                                                                <div class="row g-2">
+                                                                    <div class="col mb-1">
+                                                                        <button type="button" class="btn btn-success btn-sm mark-attendance w-100 mb-0.5" data-status="present">
+                                                                            <span class="d-none d-sm-inline">Present</span>
+                                                                            <span class="d-inline d-sm-none">Present</span>
+                                                                        </button>
+                                                                    </div>
+                                                                    <div class="col mb-1">
+                                                                        <button type="button" class="btn btn-warning btn-sm mark-attendance w-100 mb-0.5" data-status="late">
+                                                                            <span class="d-none d-sm-inline">Late</span>
+                                                                            <span class="d-inline d-sm-none">Late</span>
+                                                                        </button>
+                                                                    </div>
+                                                                    <div class="col mb-1">
+                                                                        <button type="button" class="btn btn-danger btn-sm mark-attendance w-100 mb-1" data-status="absent">
+                                                                            <span class="d-none d-sm-inline">Absent</span>
+                                                                            <span class="d-inline d-sm-none">Absent</span>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </form>
+                                                        </td>
+                                                        <td><?php echo htmlspecialchars($row['last_name']); ?></td>
+                                                        <td><?php echo htmlspecialchars($row['first_name']); ?></td>
+                                                    </tr>
                                                     <?php endwhile; ?>
                                                 </tbody>
                                             </table>
-                                        </div>
-                                        <div class="centered-button mt-3">
-                                            <center>
-                                                <a href="dashboard.php" class="btn btn-primary">
-                                                    <i class="bx bx-chevron-left"></i> Back to Dashboard
-                                                </a>
-                                            </center>
                                         </div>
                                     </div>
                                 </div>
@@ -405,8 +519,8 @@ $result = $stmt->get_result();
 
     <script>
         $(document).ready(function() {
-            function updateStatusIcon(studentId, status) {
-                var statusElement = $('#status_' + studentId);
+            function updateStatusIcon(employeeId, status) {
+                var statusElement = $('#status_' + employeeId);
                 statusElement.removeClass('text-success text-warning text-danger text-primary');
 
                 switch (status) {
@@ -426,12 +540,11 @@ $result = $stmt->get_result();
             }
 
             function refreshTable() {
-                location.reload(); // Reload the whole page
-                // Alternatively, you could fetch and update only the table content with AJAX here
+                location.reload();
             }
 
             $('.mark-attendance').click(function() {
-                var studentId = $(this).closest('.attendance-form').find('input[name="student_id"]').val();
+                var employeeId = $(this).closest('.attendance-form').find('input[name="employee_id"]').val();
                 var status = $(this).data('status');
 
                 Swal.fire({
@@ -445,25 +558,24 @@ $result = $stmt->get_result();
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: 'process_attendance.php', // URL updated for student attendance
+                            url: 'process_attendance.php',
                             method: 'POST',
                             dataType: 'json', // Expect JSON response
                             data: {
-                                student_id: studentId,  // Updated parameter to student_id
+                                employee_id: employeeId,
                                 attendance_status: status
                             },
                             success: function(response) {
                                 if (response.status === 'success') {
-                                    updateStatusIcon(studentId, status);
+                                    updateStatusIcon(employeeId, status);
                                     Swal.fire(
                                         'Success!',
                                         response.message,
                                         'success'
                                     ).then(() => {
-                                        // Add a delay of 2 seconds before refreshing the table
                                         setTimeout(function() {
-                                            refreshTable(); // Refresh the table or page
-                                        }, 1000); // 2000 milliseconds = 2 seconds
+                                            refreshTable(); 
+                                        }, 1000); 
                                     });
                                 } else {
                                     Swal.fire(

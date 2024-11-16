@@ -37,36 +37,57 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
 ?>
 
 <!DOCTYPE html>
-<html lang="en" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../../assets/">
+<html lang="en" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
     <title>Attendance Monitoring System</title>
     <meta name="description" content="" />
+
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="../../assets/img/avatars/logo.png"/>
+
+    <!-- SweetAlert CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <!-- SweetAlert JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" />
+
+    <!-- Link Poppins font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Icons. Uncomment required icon fonts -->
     <link rel="stylesheet" href="../../assets/vendor/fonts/boxicons.css" />
+
     <!-- Core CSS -->
     <link rel="stylesheet" href="../../assets/vendor/css/core.css" class="template-customizer-core-css" />
     <link rel="stylesheet" href="../../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
     <link rel="stylesheet" href="../../assets/css/demo.css" />
+
     <!-- Vendors CSS -->
     <link rel="stylesheet" href="../../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
     <link rel="stylesheet" href="../../assets/vendor/libs/apex-charts/apex-charts.css" />
-    <!-- Page CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <!-- Helpers -->
     <script src="../../assets/vendor/js/helpers.js"></script>
-    <!-- Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="../../assets/js/config.js"></script>
-    <style type="text/css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <style>
         .btn > a {
             color: white;
         }
@@ -84,16 +105,17 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         <div class="layout-container">
             <!-- Menu -->
             <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-                <div class="app-brand demo" style=" padding: 70px;">
+                <div class="app-brand demo" style="padding: 70px;">
                     <div class="logo">
                         <img style="border-radius: 500px; box-shadow: 2px 2px 20px #00008b; margin-top: 30px; margin-bottom: 5px;" src="../../assets/img/avatars/logo.png" width="100" height="100" alt="">
-                        <b><p style="font-size: 20px; color: blue; text-shadow: 2px 2px 50px #00008b; padding-left: 18px;">S L S U</p></b>
+                        <b>
+                            <p style="font-size: 20px; color: blue; text-shadow: 2px 2px 50px #00008b; padding-left: 18px;">S L S U</p>
+                        </b>
                     </div>
-                    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
-                        <i class="bx bx-chevron-left bx-sm align-middle"></i>
-                    </a>
+                        <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
+                            <i class="bx bx-chevron-left bx-sm align-middle"></i>
+                        </a>
                 </div>
-                <div class="menu-inner-shadow"></div>
                 <ul class="menu-inner py-1">
                     <!-- Dashboard -->
                     <li class="menu-item">
@@ -107,11 +129,11 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                             <i class="menu-icon tf-icons bx bx-user-circle"></i>
                             <div data-i18n="Layouts">User</div>
                         </a>
-                        <ul class="menu-sub active">
-                            <li class="menu-item">
-                              <a href="student.php" class="menu-link">
-                                <div data-i18n="Analytics">Student</div>
-                              </a>
+                        <ul class="menu-sub">
+                            <li class="menu-item active">
+                                <a href="student.php" class="menu-link">
+                                    <div data-i18n="Analytics">Student</div>
+                                </a>
                             </li>
                             <li class="menu-item">
                                 <a href="employee.php" class="menu-link">
@@ -127,18 +149,18 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                         </a>
                         <ul class="menu-sub">
                             <li class="menu-item">
-                              <a href="attendance_gate.php" class="menu-link">
-                                <div data-i18n="Analytics">Gate Marking</div>
-                              </a>
+                                <a href="attendance_gate.php" class="menu-link">
+                                    <div data-i18n="Analytics">Gate Marking</div>
+                                </a>
                             </li>
                             <li class="menu-item">
-                              <a href="employee_attendance_information_flag.php" class="menu-link">
-                                <div data-i18n="Analytics">Flag Ceremony</div>
-                              </a>
+                                <a href="attendance_flag.php" class="menu-link">
+                                    <div data-i18n="Analytics">Flag Ceremony</div>
+                                </a>
                             </li>
                         </ul>
                     </li>
-                   <!--  <li class="menu-item">
+                    <!-- <li class="menu-item">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-calendar-event"></i>
                             <div data-i18n="Layouts">Event</div>
@@ -160,7 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-printer"></i>
                             <div data-i18n="Analytics">Print</div>
-                        </a>
+                         </a>
                         <ul class="menu-sub">
                             <li class="menu-item">
                                 <a href="print/print_flag.php" class="menu-link">
@@ -168,9 +190,9 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                                 </a>
                             </li>
                             <li class="menu-item">
-                              <a href="print/print_flag_student.php" class="menu-link">
-                                <div data-i18n="Analytics">Flag Ceremony of Student</div>
-                              </a>
+                                <a href="print/print_flag_student.php" class="menu-link">
+                                    <div data-i18n="Analytics">Flag Ceremony of Student</div>
+                                </a>
                             </li>
                             <li class="menu-item">
                                 <a href="print/print_gate.php" class="menu-link">
@@ -182,6 +204,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                 </ul>
             </aside>
             <!-- / Menu -->
+
             <!-- Layout container -->
             <div class="layout-page">
                 <!-- Navbar -->
@@ -192,15 +215,16 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                         </a>
                     </div>
                     <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
-                        <center> 
-                            <p style="font-size: 18px; padding-top: 15px;"><b>Southern Leyte State University</b></p>  
+                        <center>
+                            <p style="font-size: 18px; padding-top: 15px;"><b>Southern Leyte State University</b></p>
                         </center>
                         <ul class="navbar-nav flex-row align-items-center ms-auto">
+                            <!-- Place this tag where you want the button to render. -->
                             <!-- User -->
                             <li class="nav-item navbar-dropdown dropdown-user dropdown">
                                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                                     <div class="avatar avatar-online">
-                                        <img src="../../assets/img/avatars/user.png" alt class="w-px-40 h-auto rounded-circle" />
+                                        <img src="../../assets/img/avatars/user.png" alt="" class="w-px-40 h-auto rounded-circle" />
                                     </div>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
@@ -209,7 +233,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                                             <div class="d-flex">
                                                 <div class="flex-shrink-0 me-3">
                                                     <div class="avatar avatar-online">
-                                                        <img src="../../assets/img/avatars/user.png" alt class="w-px-40 h-auto rounded-circle" />
+                                                        <img src="../../assets/img/avatars/user.png" alt="" class="w-px-40 h-auto rounded-circle" />
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1">
@@ -232,6 +256,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                     </div>
                 </nav>
                 <!-- / Navbar -->
+
                 <!-- Content wrapper -->
                 <div class="content-wrapper">
                     <!-- Content -->
@@ -243,15 +268,15 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                                         <div class="col-lg-12">
                                             <div class="card-body">
                                                 <div class="col-sm-12">
-                                                    <h1 class="text-center mb-4 student-enrolle"><a href="auth-register-basic.php">Available Student</a></h1>
-
-                                                    <!-- Search Form -->
+                                                    <h1 class="text-center mb-4 student-enrolle"><a href="dashboard.php">Available Student</a></h1>
+                                                    <!-- Search -->
                                                     <form method="GET" action="employee.php" class="mb-4">
                                                         <div class="input-group">
                                                             <input type="text" class="form-control" name="firstname" placeholder="Search by First Name" value="<?php echo $firstnameFilter; ?>">
                                                             <button class="btn btn-primary" type="submit">Search</button>
                                                         </div>
                                                     </form>
+                                                    <!-- / Search  -->
                                                     <button class="btn btn-primary mb-2"><a href="student_registration.php">Add New Student</a></button>
                                                     <div class="table-responsive">
                                                         <table class="table table-bordered table-striped">
@@ -269,29 +294,29 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
-                                                              <?php
-                                                              if (isset($result) && mysqli_num_rows($result) > 0) {
-                                                                  while ($row = mysqli_fetch_array($result)) {
-                                                                      echo "<tr>";
-                                                                      echo "<td>" . $row['student_id'] . "</td>";
-                                                                      echo "<td>" . $row['first_name'] . "</td>";
-                                                                      echo "<td>" . $row['last_name'] . "</td>";
-                                                                      echo "<td>" . $row['address'] . "</td>";
-                                                                      echo "<td>" . $row['gender'] . "</td>";
-                                                                      echo "<td>" . $row['email'] . "</td>";
-                                                                      echo "<td>" . $row['date_of_birth'] . "</td>";
-                                                                      echo "<td>" . $row['phone_number'] . "</td>";
-                                                                      echo "<td class='action-icons'>";
-                                                                      echo "<a href='view_student_profile.php?student_id=" . $row['student_id'] . "'><i class='menu-icon tf-icons bx bx-show'></i></a>";
-                                                                      echo "<a onclick=\"return confirm('Are you sure?')\" href='delete_student.php?student_id=" . $row['student_id'] . "'><i class='menu-icon tf-icons bx bx-trash'></i></a>";
-                                                                      echo "</td>";
-                                                                      echo "</tr>";
-                                                                  }
-                                                              } else {
-                                                                  echo "<tr><td colspan='9'>No records found</td></tr>";
-                                                              }
-                                                              ?>
-                                                          </tbody>
+                                                                <?php
+                                                                    if (isset($result) && mysqli_num_rows($result) > 0) {
+                                                                        while ($row = mysqli_fetch_array($result)) {
+                                                                            echo "<tr>";
+                                                                            echo "<td>" . $row['student_id'] . "</td>";
+                                                                            echo "<td>" . $row['first_name'] . "</td>";
+                                                                            echo "<td>" . $row['last_name'] . "</td>";
+                                                                            echo "<td>" . $row['address'] . "</td>";
+                                                                            echo "<td>" . $row['gender'] . "</td>";
+                                                                            echo "<td>" . $row['email'] . "</td>";
+                                                                            echo "<td>" . $row['date_of_birth'] . "</td>";
+                                                                            echo "<td>" . $row['phone_number'] . "</td>";
+                                                                            echo "<td class='action-icons'>";
+                                                                            echo "<a href='view_student_profile.php?student_id=" . $row['student_id'] . "'><i class='menu-icon tf-icons bx bx-show'></i></a>";
+                                                                            echo "<a onclick=\"return confirm('Are you sure?')\" href='delete_student.php?student_id=" . $row['student_id'] . "'><i class='menu-icon tf-icons bx bx-trash'></i></a>";
+                                                                            echo "</td>";
+                                                                            echo "</tr>";
+                                                                        }
+                                                                    } else {
+                                                                        echo "<tr><td colspan='9'>No records found</td></tr>";
+                                                                    }
+                                                                ?>
+                                                            </tbody>
                                                         </table>
                                                     </div>
                                                     <div class="text-center mt-3">
@@ -305,30 +330,29 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                             </div>
                         </div>
                     </div>
+                    <!-- / Content -->
                 </div>
-                <!-- / Content -->
+                <!-- / Content wrapper -->
+
                 <!-- Footer -->
                 <footer class="content-footer footer bg-footer-theme">
-                            <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
-                                <div class="mb-2 mb-md-0">
-                                    ©
-                                    <script>
-                                        document.write(new Date().getFullYear());
-                                    </script>
-                                    , made with ❤️ by
-                                    <a href="https://www.facebook.com/james.jeager.3" target="_blank" class="footer-link fw-bolder">MeProfile</a>
-                                </div>
-                            </div>
-                        </footer>
+                    <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
+                        <div class="mb-2 mb-md-0">
+                            ©
+                            <script>
+                                document.write(new Date().getFullYear());
+                            </script>, made with ❤️ by
+                            <a href="https://www.facebook.com/james.jeager.3" target="_blank" class="footer-link fw-bolder">MeProfile</a>
+                        </div>
+                    </div>
+                </footer>
                 <!-- / Footer -->
-                <div class="content-backdrop fade"></div>
             </div>
-            <!-- Content wrapper -->
+            <!-- / Layout page -->
         </div>
-        <!-- / Layout page -->
     </div>
-    <!-- Overlay -->
-    <div class="layout-overlay layout-menu-toggle"></div>
+    <!-- / Layout wrapper -->
+
     <!-- Core JS -->
     <!-- build:js assets/vendor/js/core.js -->
     <script src="../../assets/vendor/libs/jquery/jquery.js"></script>
@@ -337,13 +361,20 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
     <script src="../../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
     <script src="../../assets/vendor/js/menu.js"></script>
     <!-- endbuild -->
+
     <!-- Vendors JS -->
     <script src="../../assets/vendor/libs/apex-charts/apexcharts.js"></script>
+
     <!-- Main JS -->
     <script src="../../assets/js/main.js"></script>
+
     <!-- Page JS -->
-    <script src="../../assets/js/dashboards-analytics.js"></script>
+    <script src="../../assets/js/pages-account-settings-account.js"></script>
+
     <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+    <!-- GitHub buttons script -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>
 </html>

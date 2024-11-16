@@ -52,178 +52,198 @@ $result->close();
 ?>
 
 <!DOCTYPE html>
-<html lang="en" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../../assets/" data-template="vertical-menu-template-free">
+<html lang="en" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
     <title>Attendance Monitoring System</title>
     <meta name="description" content="" />
+
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="../../assets/img/avatars/logo.png"/>
+
+    <!-- SweetAlert CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <!-- SweetAlert JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" />
+
+    <!-- Link Poppins font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Icons. Uncomment required icon fonts -->
     <link rel="stylesheet" href="../../assets/vendor/fonts/boxicons.css" />
+
     <!-- Core CSS -->
     <link rel="stylesheet" href="../../assets/vendor/css/core.css" class="template-customizer-core-css" />
     <link rel="stylesheet" href="../../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
     <link rel="stylesheet" href="../../assets/css/demo.css" />
+
     <!-- Vendors CSS -->
     <link rel="stylesheet" href="../../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
     <link rel="stylesheet" href="../../assets/vendor/libs/apex-charts/apex-charts.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <!-- Helpers -->
     <script src="../../assets/vendor/js/helpers.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="../../assets/js/config.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
     <style>
-      .btn {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-      }
+        body, .navbar, .card, .btn, .form-control, .dropdown-menu, .avatar, .dropdown-item, .navbar-dropdown, .nav-link, .menu-item, .menu-link, .menu-sub, .status-icon {
+            font-family: 'Poppins', sans-serif;
+        }
 
-      .btn-primary {
-        background-color: #007bff;
-        color: #fff;
-      }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
 
-      .btn-primary:hover {
-        background-color: #0056b3;
-      }
+        .btn-primary {
+            background-color: #007bff;
+            color: #fff;
+        }
 
-      .btn-success {
-        background-color: #28a745;
-        color: #fff;
-      }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
 
-      .btn-success:hover {
-        background-color: #218838;
-      }
+        .btn-success {
+            background-color: #28a745;
+            color: #fff;
+        }
 
-      .queue-number {
-        font-size: 24px;
-        font-weight: bold;
-        margin: 0 20px;
-      }
+        .btn-success:hover {
+            background-color: #218838;
+        }
 
-      .centered-button {
-        text-align: center;
-        margin-top: 20px;
-      }
+        .queue-number {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0 20px;
+        }
 
-      .table-responsive {
-        margin-top: 50px;
-        margin-left: 50px;
-      }
+        .centered-button {
+            text-align: center;
+            margin-top: 20px;
+        }
 
-      .table {
-        margin-bottom: 0;
-      }
+        .table-responsive {
+            margin-top: 50px;
+            margin-left: 50px;
+        }
 
-      .in {
-        color: green;
-        font-weight: bold;
-      }
+        .table {
+            margin-bottom: 0;
+        }
 
-      .out {
-        color: red;
-        font-weight: bold;
-      }
-      /* Table Row Colors */
-      tr.in {
-          background-color: #dff0d8; /* Light green background for 'In' */
-      }
-      tr.out {
-          background-color: #f8d7da; /* Light red background for 'Out' */
-      }
+        .in {
+            color: green;
+            font-weight: bold;
+        }
 
-      /* Entry Type Text Color */
-      .entry-type-in {
-          color: green; /* Green text color for 'In' */
-      }
-      .entry-type-out {
-          color: red; /* Red text color for 'Out' */
-      }
+        .out {
+            color: red;
+            font-weight: bold;
+        }
 
-      /* Apply Poppins font to entire document */
-      body {
-          font-family: 'Poppins', sans-serif;
-      }
+        tr.in {
+            background-color: #dff0d8;  
+        }
 
-      .custom-outline-button {
-          border: 2px solid #007bff; /* Outline color and thickness */
-          background-color: transparent; /* Transparent background */
-          color: #007bff; /* Text color matching the outline */
-          padding: 10px 20px; /* Padding inside the button */
-          font-size: 16px; /* Font size */
-          border-radius: 5px; /* Rounded corners */
-          cursor: pointer; /* Pointer cursor on hover */
-          transition: all 0.3s ease; /* Smooth transition for hover effects */
-      }
+        tr.out {
+            background-color: #f8d7da;  
+        }
 
-      .custom-outline-button:hover {
-          background-color: #007bff; /* Blue background on hover */
-          color: white; /* White text on hover */
-      }
+        .entry-type-in {
+            color: green;  
+        }
 
-      .custom-outline-button:focus {
-          outline: none; /* Remove default focus outline */
-          box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Custom focus effect */
-      }
+        .entry-type-out {
+            color: red;  
+        }
+
+        .custom-outline-button {
+            border: 2px solid #007bff;  
+            background-color: transparent;  
+            color: #007bff;  
+            padding: 10px 20px; 
+            font-size: 16px;  
+            border-radius: 5px;  
+            cursor: pointer;  
+            transition: all 0.3s ease;  
+        }
+
+        .custom-outline-button:hover {
+            background-color: #007bff;  
+            color: white;  
+        }
+
+        .custom-outline-button:focus {
+            outline: none;  
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);  
+        }
     </style>
 </head>
-
 <body>
     <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
             <!-- Menu -->
             <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-                <div class="app-brand demo" style=" padding: 70px;">
+                <div class="app-brand demo" style="padding: 70px;">
                     <div class="logo">
                         <img style="border-radius: 500px; box-shadow: 2px 2px 20px #00008b; margin-top: 30px; margin-bottom: 5px;" src="../../assets/img/avatars/logo.png" width="100" height="100" alt="">
                         <b>
                             <p style="font-size: 20px; color: blue; text-shadow: 2px 2px 50px #00008b; padding-left: 18px;">S L S U</p>
                         </b>
                     </div>
-                    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
-                        <i class="bx bx-chevron-left bx-sm align-middle"></i>
-                    </a>
+                        <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
+                            <i class="bx bx-chevron-left bx-sm align-middle"></i>
+                        </a>
                 </div>
-                <div class="menu-inner-shadow"></div>
                 <ul class="menu-inner py-1">
-                    <!-- Profile -->
+                    <!-- Dashboard -->
                     <li class="menu-item">
                         <a href="dashboard.php" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-chalkboard"></i>
-                            <div data-i18n="Layouts">Dashboard</div>
+                            <div data-i18n="Analytics">Dashboard</div>
                         </a>
                     </li>
                     <li class="menu-item active">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-calendar-check"></i>
+                            <i class="menu-icon tf-icons bx bx-user-circle"></i>
                             <div data-i18n="Layouts">Attendance</div>
                         </a>
                         <ul class="menu-sub">
                             <li class="menu-item active">
                                 <a href="employee_attendance_information_gate.php" class="menu-link">
-                                    <div data-i18n="Without menu">Gate Marking</div>
+                                    <div data-i18n="Without menu">Gate</div>
                                 </a>
                             </li>
                             <li class="menu-item">
                                 <a href="employee_attendance_information_flag.php" class="menu-link">
-                                    <div data-i18n="Without menu">Flag Ceremony</div>
+                                    <div data-i18n="Without menu">Flag</div>
                                 </a>
                             </li>
                         </ul>
                     </li>
-                    <li class="menu-item">
+                    <!-- <li class="menu-item">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-user-circle"></i>
                             <div data-i18n="Layouts">Me</div>
@@ -245,10 +265,31 @@ $result->close();
                                 </a>
                             </li>
                         </ul>
+                    </li> -->
+                    <li class="menu-item">
+                        <a href="javascript:void(0);" class="menu-link menu-toggle">
+                            <i class="menu-icon tf-icons bx bx-printer"></i>
+                            <div data-i18n="Analytics">Print</div>
+                         </a>
+                        <ul class="menu-sub">
+                            <li class="menu-item">
+                                <a href="print/print_flag.php" class="menu-link">
+                                    <div data-i18n="Analytics">Flag Ceremony of Employee</div>
+                                </a>
+                            </li>                        
+                        </ul>
+                        <ul class="menu-sub">
+                            <li class="menu-item">
+                                <a href="print/print_gate.php" class="menu-link">
+                                    <div data-i18n="Analytics">Gate Marking of Employee</div>
+                                </a>
+                            </li>                        
+                        </ul>
                     </li>
                 </ul>
             </aside>
             <!-- / Menu -->
+
             <!-- Layout container -->
             <div class="layout-page">
                 <!-- Navbar -->
@@ -263,41 +304,13 @@ $result->close();
                             <p style="font-size: 18px; padding-top: 15px;"><b>Southern Leyte State University</b></p>
                         </center>
                         <ul class="navbar-nav flex-row align-items-center ms-auto">
+                            <!-- Place this tag where you want the button to render. -->
                             <!-- User -->
                             <li class="nav-item navbar-dropdown dropdown-user dropdown">
                                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                                     <div class="avatar avatar-online">
-                                        <img src="../../assets/img/avatars/profile.png" alts class="w-px-40 h-auto rounded-circle" />
+                                    <img src="../../assets/img/avatars/profile.png" alts class="w-px-40 h-auto rounded-circle" />
                                     </div>
-                                    <?php
-                                    // SQL query to select employee details by employee_id
-                                    $sql = "SELECT * FROM employee_registration WHERE employee_id = ?";
-
-                                    // Use prepared statement to prevent SQL injection
-                                    $stmt = $conn->prepare($sql);
-                                    if ($stmt) {
-                                        $stmt->bind_param("i", $employee_id);
-
-                                        // Execute query
-                                        $stmt->execute();
-
-                                        // Get result
-                                        $result = $stmt->get_result();
-
-                                        // Check if employee exists
-                                        if ($result->num_rows > 0) {
-                                            // Fetch employee details as an associative array
-                                            $row = $result->fetch_assoc();
-                                        } else {
-                                            echo "Employee not found";
-                                        }
-
-                                        // Close prepared statement
-                                        $stmt->close();
-                                    } else {
-                                        echo "Database query failed"; // Handle potential SQL statement preparation error
-                                    }
-                                    ?>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li>
@@ -310,7 +323,7 @@ $result->close();
                                                 </div>
                                                 <div class="flex-grow-1">
                                                     <span class="fw-semibold d-block"></span>
-                                                    <small class="text-muted"><?php echo isset($row['first_name']) ? htmlspecialchars($row['first_name']) : ''; ?><br><?php echo isset($row['last_name']) ? htmlspecialchars($row['last_name']) : ''; ?></small>
+                                                    <small class="text-muted">Employee</small>
                                                 </div>
                                             </div>
                                         </a>
@@ -328,6 +341,7 @@ $result->close();
                     </div>
                 </nav>
                 <!-- / Navbar -->
+
                 <!-- Content wrapper -->
                 <div class="content-wrapper">
                     <!-- Content -->
@@ -341,6 +355,7 @@ $result->close();
                                 </form>
                             </div>
                         </div>
+                        <!-- / Search -->
                         <div class="row">
                             <div class="col-lg-12 mb-4 order-0">
                                 <div class="card">
@@ -363,20 +378,18 @@ $result->close();
                                                                     </thead>
                                                                     <tbody>
                                                                     <?php foreach ($attendance_data as $index => $attendance) : ?>
-                                                                      <tr class="<?php echo strtolower($attendance['entry_type']); ?>">
-                                                                          <td><?php echo $index + 1; ?></td>
-                                                                          <td><?php echo htmlspecialchars($attendance['entry_time']); ?></td>
-                                                                          <td class="entry-type-<?php echo strtolower($attendance['entry_type']); ?>">
-                                                                              <?php echo htmlspecialchars($attendance['entry_type']); ?>
-                                                                          </td>
-                                                                          <td><?php echo htmlspecialchars($attendance['description']); ?></td>
-                                                                      </tr>
-                                                                  <?php endforeach; ?>
-
+                                                                        <tr class="<?php echo strtolower($attendance['entry_type']); ?>">
+                                                                            <td><?php echo $index + 1; ?></td>
+                                                                            <td><?php echo htmlspecialchars($attendance['entry_time']); ?></td>
+                                                                            <td class="entry-type-<?php echo strtolower($attendance['entry_type']); ?>">
+                                                                                <?php echo htmlspecialchars($attendance['entry_type']); ?>
+                                                                            </td>
+                                                                            <td><?php echo htmlspecialchars($attendance['description']); ?></td>
+                                                                        </tr>
+                                                                    <?php endforeach; ?>
                                                                     </tbody>
                                                                 </table>
                                                             </div>
-                                                            <!-- After the table in your existing code -->
                                                             <div class="centered-button">
                                                                 <a href="dashboard.php" class="btn btn-primary">
                                                                     <i class="bx bx-chevron-left"></i> Back to Dashboard
@@ -392,29 +405,29 @@ $result->close();
                             </div>
                         </div>
                     </div>
-                    <footer class="content-footer footer bg-footer-theme">
-                        <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
-                            <div class="mb-2 mb-md-0">
-                                ©
-                                <script>
-                                    document.write(new Date().getFullYear());
-                                </script>
-                                , made with ❤️ by
-                                <a href="https://www.facebook.com/james.jeager.3" target="_blank" class="footer-link fw-bolder">MeProfile</a>
-                            </div>
-                        </div>
-                    </footer>
+                    <!-- / Content -->
                 </div>
+                <!-- / Content wrapper -->
+
                 <!-- Footer -->
+                <footer class="content-footer footer bg-footer-theme">
+                    <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
+                        <div class="mb-2 mb-md-0">
+                            ©
+                            <script>
+                                document.write(new Date().getFullYear());
+                            </script>, made with ❤️ by
+                            <a href="https://www.facebook.com/james.jeager.3" target="_blank" class="footer-link fw-bolder">MeProfile</a>
+                        </div>
+                    </div>
+                </footer>
                 <!-- / Footer -->
-                <div class="content-backdrop fade"></div>
             </div>
-            <!-- Content wrapper -->
+            <!-- / Layout page -->
         </div>
-        <!-- / Layout page -->
     </div>
-    <!-- Overlay -->
-    <div class="layout-overlay layout-menu-toggle"></div>
+    <!-- / Layout wrapper -->
+
     <!-- Core JS -->
     <!-- build:js assets/vendor/js/core.js -->
     <script src="../../assets/vendor/libs/jquery/jquery.js"></script>
@@ -423,13 +436,20 @@ $result->close();
     <script src="../../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
     <script src="../../assets/vendor/js/menu.js"></script>
     <!-- endbuild -->
+
     <!-- Vendors JS -->
     <script src="../../assets/vendor/libs/apex-charts/apexcharts.js"></script>
+
     <!-- Main JS -->
     <script src="../../assets/js/main.js"></script>
+
     <!-- Page JS -->
-    <script src="../../assets/js/dashboards-analytics.js"></script>
+    <script src="../../assets/js/pages-account-settings-account.js"></script>
+
     <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+    <!-- GitHub buttons script -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>
 </html>

@@ -38,41 +38,87 @@ $stmt_assigned->execute();
 $stmt_assigned->bind_result($is_assigned); // Only bind the is_assigned value
 $stmt_assigned->fetch();
 $stmt_assigned->close();
+
+// SQL query to select student details by student_id
+$sql = "SELECT * FROM student_registration WHERE student_id = ?";
+
+// Use prepared statement to prevent SQL injection
+$stmt = $conn->prepare($sql);
+if ($stmt) {
+    $stmt->bind_param("i", $student_id);
+
+    // Execute query
+    $stmt->execute();
+
+    // Get result
+    $result = $stmt->get_result();
+
+    // Check if student exists
+    if ($result->num_rows > 0) {
+        // Fetch student details as an associative array
+        $row = $result->fetch_assoc();
+    } else {
+        echo "Employee not found";
+    }
+
+    // Close prepared statement
+    $stmt->close();
+} else {
+    echo "Database query failed"; // Handle potential SQL statement preparation error
+}
 ?>
+
 <!DOCTYPE html>
-<html lang="en" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../../assets/" data-template="vertical-menu-template-free">
+<html lang="en" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
     <title>Attendance Monitoring System</title>
     <meta name="description" content="" />
+
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="../../assets/img/avatars/logo.png"/>
+
+    <!-- SweetAlert CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <!-- SweetAlert JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- FullCalendar CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css" rel="stylesheet" />
-    <!-- FullCalendar JS -->
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
 
+    <!-- Link Poppins font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Icons. Uncomment required icon fonts -->
     <link rel="stylesheet" href="../../assets/vendor/fonts/boxicons.css" />
+
     <!-- Core CSS -->
     <link rel="stylesheet" href="../../assets/vendor/css/core.css" class="template-customizer-core-css" />
     <link rel="stylesheet" href="../../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
     <link rel="stylesheet" href="../../assets/css/demo.css" />
+
     <!-- Vendors CSS -->
     <link rel="stylesheet" href="../../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
     <link rel="stylesheet" href="../../assets/vendor/libs/apex-charts/apex-charts.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <!-- Helpers -->
     <script src="../../assets/vendor/js/helpers.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="../../assets/js/config.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
     <style>
         body {
             font-family: poppins, sans-serif;
@@ -133,79 +179,69 @@ $stmt_assigned->close();
         .attendance-table tr:nth-child(even) {
             background-color: #f9f9f9;
         }
+
+        .attendance-flags li {
+            font-size: 25px; /* Adjust the font size as needed */
+            text-transform: capitalize; /* Capitalize the text */
+            margin-bottom: 10px; /* Optional: Adjust spacing between list items */
+        }
     </style>
 </head>
-
 <body>
     <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
             <!-- Menu -->
             <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-                <div class="app-brand demo" style=" padding: 70px;">
+                <div class="app-brand demo" style="padding: 70px;">
                     <div class="logo">
                         <img style="border-radius: 500px; box-shadow: 2px 2px 20px #00008b; margin-top: 30px; margin-bottom: 5px;" src="../../assets/img/avatars/logo.png" width="100" height="100" alt="">
                         <b>
                             <p style="font-size: 20px; color: blue; text-shadow: 2px 2px 50px #00008b; padding-left: 18px;">S L S U</p>
                         </b>
                     </div>
-                    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
-                        <i class="bx bx-chevron-left bx-sm align-middle"></i>
-                    </a>
+                        <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
+                            <i class="bx bx-chevron-left bx-sm align-middle"></i>
+                        </a>
                 </div>
-                <div class="menu-inner-shadow"></div>
                 <ul class="menu-inner py-1">
-                    <!-- Profile -->
+                    <!-- Dashboard -->
                     <li class="menu-item">
                         <a href="dashboard.php" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-chalkboard"></i>
-                            <div data-i18n="Layouts">Dashboard</div>
+                            <div data-i18n="Analytics">Dashboard</div>
                         </a>
                     </li>
                     <li class="menu-item active">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-calendar-check"></i>
+                            <i class="menu-icon tf-icons bx bx-user-circle"></i>
                             <div data-i18n="Layouts">Attendance</div>
                         </a>
                         <ul class="menu-sub">
-                            <!-- <li class="menu-item">
-                                <a href="employee_attendance_information_gate.php" class="menu-link">
-                                    <div data-i18n="Without menu">Gate Marking</div>
-                                </a>
-                            </li> -->
                             <li class="menu-item active">
                                 <a href="student_attendance_information_flag.php" class="menu-link">
-                                    <div data-i18n="Without menu">Flag Ceremony</div>
+                                    <div data-i18n="Analytics">Flag</div>
                                 </a>
                             </li>
                         </ul>
                     </li>
-                    <!-- <li class="menu-item">
+                    <li class="menu-item">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-user-circle"></i>
-                            <div data-i18n="Layouts">Me</div>
-                        </a>
+                            <i class="menu-icon tf-icons bx bx-printer"></i>
+                            <div data-i18n="Analytics">Print</div>
+                         </a>
                         <ul class="menu-sub">
                             <li class="menu-item">
-                                <a href="employee.php" class="menu-link">
-                                    <div data-i18n="Without menu">Profile</div>
+                                <a href="print/print_flag.php" class="menu-link">
+                                    <div data-i18n="Analytics">Flag Ceremony of Student</div>
                                 </a>
-                            </li>
-                            <li class="menu-item">
-                                <a href="#.php" class="menu-link">
-                                    <div data-i18n="Without menu">OTQRC</div>
-                                </a>
-                            </li>
-                            <li class="menu-item">
-                                <a href="#.php" class="menu-link">
-                                    <div data-i18n="Without menu">History Log</div>
-                                </a>
-                            </li>
+                            </li>                        
                         </ul>
-                    </li> -->
+                    </li>
                 </ul>
             </aside>
             <!-- / Menu -->
+
             <!-- Layout container -->
             <div class="layout-page">
                 <!-- Navbar -->
@@ -220,41 +256,13 @@ $stmt_assigned->close();
                             <p style="font-size: 18px; padding-top: 15px;"><b>Southern Leyte State University</b></p>
                         </center>
                         <ul class="navbar-nav flex-row align-items-center ms-auto">
+                            <!-- Place this tag where you want the button to render. -->
                             <!-- User -->
                             <li class="nav-item navbar-dropdown dropdown-user dropdown">
                                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                                     <div class="avatar avatar-online">
-                                        <img src="../../assets/img/avatars/profile.png" alts class="w-px-40 h-auto rounded-circle" />
+                                    <img src="../../assets/img/avatars/profile.png" alts class="w-px-40 h-auto rounded-circle" />
                                     </div>
-                                    <?php
-                                    // SQL query to select student details by student_id
-                                    $sql = "SELECT * FROM student_registration WHERE student_id = ?";
-
-                                    // Use prepared statement to prevent SQL injection
-                                    $stmt = $conn->prepare($sql);
-                                    if ($stmt) {
-                                        $stmt->bind_param("i", $student_id);
-
-                                        // Execute query
-                                        $stmt->execute();
-
-                                        // Get result
-                                        $result = $stmt->get_result();
-
-                                        // Check if student exists
-                                        if ($result->num_rows > 0) {
-                                            // Fetch student details as an associative array
-                                            $row = $result->fetch_assoc();
-                                        } else {
-                                            echo "Employee not found";
-                                        }
-
-                                        // Close prepared statement
-                                        $stmt->close();
-                                    } else {
-                                        echo "Database query failed"; // Handle potential SQL statement preparation error
-                                    }
-                                    ?>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li>
@@ -285,6 +293,7 @@ $stmt_assigned->close();
                     </div>
                 </nav>
                 <!-- / Navbar -->
+
                 <!-- Content wrapper -->
                 <div class="content-wrapper">
                     <!-- Content -->
@@ -299,63 +308,55 @@ $stmt_assigned->close();
                             </div>
                         </div>
                         <!-- /Search form -->
-                    <div class="row">
-                        <div class="col-lg-12 mb-4 order-0">
-                            <div class="card">
-                                <div class="d-flex align-items-end row">
-                                    <div class="col-lg-10">
-                                        <div class="container-xxl flex-grow-1 container-p-y">
-                                            <div class="row">
-                                                <h2>Student Attendance: Flag Ceremony</h2>
-                                                <div class="col-lg-12 mb-4 order-0">
-                                                    <?php if ($is_assigned == 1) : ?>
-                                                        <div class="centered-button mb-3 mt-3">
-                                                            <a href="assign_attendance.php" class="btn btn-primary">
-                                                                Assigned for Attendance
+                        <div class="row">
+                            <div class="col-lg-12 mb-4 order-0">
+                                <div class="card">
+                                    <div class="d-flex align-items-end row">
+                                        <div class="col-lg-10">
+                                            <div class="container-xxl flex-grow-1 container-p-y">
+                                                <div class="row">
+                                                    <h2>Student Attendance: Flag Ceremony</h2>
+                                                    <div class="col-lg-12 mb-4 order-0">
+                                                        <?php if ($is_assigned == 1) : ?>
+                                                            <div class="centered-button mb-3 mt-3">
+                                                                <a href="assign_attendance.php" class="btn btn-primary">
+                                                                    Assigned for Attendance
+                                                                </a>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                        
+                                                        <!-- Display attendance flags -->
+                                                        <div class="table-responsive">
+                                                            <?php if (!empty($attendance_by_month)) : ?>
+                                                                <?php foreach ($attendance_by_month as $month => $attendance_records) : ?>
+                                                                    <h4>Attendance for <?php echo $month; ?></h4>
+                                                                    <table class="attendance-table">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Date</th>
+                                                                                <th>Status</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <?php foreach ($attendance_records as $record) : ?>
+                                                                                <tr>
+                                                                                    <td><?php echo date('F j, Y', strtotime($record['attendance_date'])); ?></td>
+                                                                                    <td><?php echo ucfirst(strtolower(htmlspecialchars($record['attendance_status']))); ?></td>
+                                                                                </tr>
+                                                                            <?php endforeach; ?>
+                                                                        </tbody>
+                                                                    </table>
+                                                                <?php endforeach; ?>
+                                                            <?php else : ?>
+                                                                <h2>No attendance records found for <?php echo htmlspecialchars($selected_month); ?></h2>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                        <div class="centered-button">
+                                                            <a href="dashboard.php" class="btn btn-primary">
+                                                                <i class="bx bx-chevron-left"></i> Back to Dashboard
                                                             </a>
                                                         </div>
-                                                    <?php endif; ?>
-                                                    
-                                                    <!-- Display attendance flags -->
-                                                    <div class="table-responsive">
-                                                        <?php if (!empty($attendance_by_month)) : ?>
-                                                            <?php foreach ($attendance_by_month as $month => $attendance_records) : ?>
-                                                                <h4>Attendance for <?php echo $month; ?></h4>
-                                                                <table class="attendance-table">
-                                                                    <thead>
-                                                                        <tr>
-                                                                            <th>Date</th>
-                                                                            <th>Status</th>
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                        <?php foreach ($attendance_records as $record) : ?>
-                                                                            <tr>
-                                                                                <td><?php echo date('F j, Y', strtotime($record['attendance_date'])); ?></td>
-                                                                                <td><?php echo ucfirst(strtolower(htmlspecialchars($record['attendance_status']))); ?></td>
-                                                                            </tr>
-                                                                        <?php endforeach; ?>
-                                                                    </tbody>
-                                                                </table>
-                                                            <?php endforeach; ?>
-                                                        <?php else : ?>
-                                                            <h2>No attendance records found for <?php echo htmlspecialchars($selected_month); ?></h2>
-                                                        <?php endif; ?>
                                                     </div>
-
-                                                    <!-- Back button -->
-                                                    <div class="centered-button">
-                                                        <a href="dashboard.php" class="btn btn-primary">
-                                                            <i class="bx bx-chevron-left"></i> Back to Dashboard
-                                                        </a>
-                                                    </div>
-                                                    <style>
-                                                        .attendance-flags li {
-                                                            font-size: 25px; /* Adjust the font size as needed */
-                                                            text-transform: capitalize; /* Capitalize the text */
-                                                            margin-bottom: 10px; /* Optional: Adjust spacing between list items */
-                                                        }
-                                                    </style>
                                                 </div>
                                             </div>
                                         </div>
@@ -364,30 +365,29 @@ $stmt_assigned->close();
                             </div>
                         </div>
                     </div>
-                    </div>
-                    <footer class="content-footer footer bg-footer-theme">
-                        <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
-                            <div class="mb-2 mb-md-0">
-                                ©
-                                <script>
-                                    document.write(new Date().getFullYear());
-                                </script>
-                                , made with ❤️ by
-                                <a href="https://www.facebook.com/james.jeager.3" target="_blank" class="footer-link fw-bolder">MeProfile</a>
-                            </div>
-                        </div>
-                    </footer>
+                    <!-- / Content -->
                 </div>
+                <!-- / Content wrapper -->
+
                 <!-- Footer -->
+                <footer class="content-footer footer bg-footer-theme">
+                    <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
+                        <div class="mb-2 mb-md-0">
+                            ©
+                            <script>
+                                document.write(new Date().getFullYear());
+                            </script>, made with ❤️ by
+                            <a href="https://www.facebook.com/james.jeager.3" target="_blank" class="footer-link fw-bolder">MeProfile</a>
+                        </div>
+                    </div>
+                </footer>
                 <!-- / Footer -->
-                <div class="content-backdrop fade"></div>
             </div>
-            <!-- Content wrapper -->
+            <!-- / Layout page -->
         </div>
-        <!-- / Layout page -->
     </div>
-    <!-- Overlay -->
-    <div class="layout-overlay layout-menu-toggle"></div>
+    <!-- / Layout wrapper -->
+
     <!-- Core JS -->
     <!-- build:js assets/vendor/js/core.js -->
     <script src="../../assets/vendor/libs/jquery/jquery.js"></script>
@@ -396,14 +396,20 @@ $stmt_assigned->close();
     <script src="../../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
     <script src="../../assets/vendor/js/menu.js"></script>
     <!-- endbuild -->
+
     <!-- Vendors JS -->
     <script src="../../assets/vendor/libs/apex-charts/apexcharts.js"></script>
+
     <!-- Main JS -->
     <script src="../../assets/js/main.js"></script>
+
     <!-- Page JS -->
-    <script src="../../assets/js/dashboards-analytics.js"></script>
+    <script src="../../assets/js/pages-account-settings-account.js"></script>
+
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
 
+    <!-- GitHub buttons script -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>
 </html>
