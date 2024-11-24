@@ -287,12 +287,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <button type="submit">Search</button>
             </form>
         </div>
-        <div class="mb-1 mt-2">
+        <!-- <div class="mb-1 mt-2">
             <center>
             <h4>Attendance Gate Data</h4>
             <p>Filter: <?php echo ucfirst($filter_type ?? "daily"); ?> | Selected Date: <?php echo htmlspecialchars($date_filter); ?></p>
         </center>
-        </div>
+        </div> -->
 
         <?php if (!empty($attendance_data)) : ?>
             <div class="table-container">

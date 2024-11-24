@@ -189,29 +189,6 @@ $conn->close();
                             </li>
                         </ul>
                     </li> -->
-                    <li class="menu-item">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-printer"></i>
-                            <div data-i18n="Analytics">Print</div>
-                         </a>
-                        <ul class="menu-sub">
-                            <li class="menu-item">
-                                <a href="print/print_flag.php" class="menu-link">
-                                    <div data-i18n="Analytics">Flag Ceremony of Employee</div>
-                                </a>
-                            </li>
-                            <li class="menu-item">
-                                <a href="print/print_flag_student.php" class="menu-link">
-                                    <div data-i18n="Analytics">Flag Ceremony of Student</div>
-                                </a>
-                            </li>
-                            <li class="menu-item">
-                                <a href="print/print_gate.php" class="menu-link">
-                                    <div data-i18n="Analytics">Gate Marking Record</div>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
                 </ul>
             </aside>
             <!-- / Menu -->
@@ -240,7 +217,7 @@ $conn->close();
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li>
-                                        <a class="dropdown-item" href="admin_profile.php">
+                                        <a class="dropdown-item" href="#">
                                             <div class="d-flex">
                                                 <div class="flex-shrink-0 me-3">
                                                     <div class="avatar avatar-online">
@@ -252,6 +229,40 @@ $conn->close();
                                                     <small class="text-muted">Admin</small>
                                                 </div>
                                             </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="admin_profile.php">
+                                            <i class="bx bx-user me-2"></i><span>My Profile</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="bx bx-cog me-2"></i><span>Settings</span>
+                                        </a>
+                                    </li>
+                                    <li class="dropdown">
+                                        <div class="dropdown-item d-flex align-items-center">
+                                            <i class="bx bx-printer me-2"></i>
+                                            <select id="print-options" class="form-select" onchange="handlePrintRedirect(this)">
+                                                <option value="" disabled selected>Select an option</option>
+                                                <option value="print/print_flag.php">Flag Ceremony Employee</option>
+                                                <option value="print/print_flag_student.php">Flag Ceremony Student</option>
+                                                <option value="print/print_gate.php">Gate Marking</option>
+                                            </select>
+                                        </div>
+                                    </li>
+                                    <script>
+                                        function handlePrintRedirect(select) {
+                                            const selectedValue = select.value;
+                                            if (selectedValue) {
+                                                window.location.href = selectedValue;
+                                            }
+                                        }
+                                    </script>
+                                    <li>
+                                        <a class="dropdown-item" href="qr/index.php">
+                                            <i class="bx bx-qr me-2"></i><span>Scan QR Code</span>
                                         </a>
                                     </li>
                                     <li>

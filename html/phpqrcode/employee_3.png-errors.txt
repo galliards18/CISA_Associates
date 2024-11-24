@@ -1,0 +1,20 @@
+2024-11-24 15:48:38: <br />
+<b>Warning</b>:  Trying to access array offset on value of type int in <b>C:\laragon\www\Attendance_Monitoring_System\html\phpqrcode\qrsplit.php</b> on line <b>71</b><br />
+<br />
+<b>Warning</b>:  Trying to access array offset on value of type int in <b>C:\laragon\www\Attendance_Monitoring_System\html\phpqrcode\qrsplit.php</b> on line <b>53</b><br />
+<br />
+<b>Deprecated</b>:  ord(): Passing null to parameter #1 ($character) of type string is deprecated in <b>C:\laragon\www\Attendance_Monitoring_System\html\phpqrcode\qrsplit.php</b> on line <b>53</b><br />
+<br />
+<b>Warning</b>:  Trying to access array offset on value of type int in <b>C:\laragon\www\Attendance_Monitoring_System\html\phpqrcode\qrsplit.php</b> on line <b>62</b><br />
+<br />
+<b>Deprecated</b>:  ord(): Passing null to parameter #1 ($character) of type string is deprecated in <b>C:\laragon\www\Attendance_Monitoring_System\html\phpqrcode\qrsplit.php</b> on line <b>62</b><br />
+2024-11-24 15:52:54: <br />
+<b>Warning</b>:  Trying to access array offset on value of type int in <b>C:\laragon\www\Attendance_Monitoring_System\html\phpqrcode\qrsplit.php</b> on line <b>71</b><br />
+<br />
+<b>Warning</b>:  Trying to access array offset on value of type int in <b>C:\laragon\www\Attendance_Monitoring_System\html\phpqrcode\qrsplit.php</b> on line <b>53</b><br />
+<br />
+<b>Deprecated</b>:  ord(): Passing null to parameter #1 ($character) of type string is deprecated in <b>C:\laragon\www\Attendance_Monitoring_System\html\phpqrcode\qrsplit.php</b> on line <b>53</b><br />
+<br />
+<b>Warning</b>:  Trying to access array offset on value of type int in <b>C:\laragon\www\Attendance_Monitoring_System\html\phpqrcode\qrsplit.php</b> on line <b>62</b><br />
+<br />
+<b>Deprecated</b>:  ord(): Passing null to parameter #1 ($character) of type string is deprecated in <b>C:\laragon\www\Attendance_Monitoring_System\html\phpqrcode\qrsplit.php</b> on line <b>62</b><br />

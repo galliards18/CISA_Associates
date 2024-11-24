@@ -10,28 +10,86 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'employee') {
 // Include the database connection script
 require '../../config.php';
 
-// Get the logged-in employee's ID
+// Get the logged-in employee's ID and department from the session
 $employee_id = $_SESSION['employee_id']; // Assuming employee_id is stored in the session
 
 // Initialize variables
 $date_filter = date("Y-m-d"); // Default to today's date
+$time_filter = 'daily'; // Default time filter
+$flag_type_filter = ''; // No default for flag type
+$view_filter = 'own'; // Default to viewing own information
 $attendance_data = [];
+
+// Fetch all available flag types for the dropdown
+$flag_types_query = "SELECT flag_id, flag_type FROM flag_type";
+$flag_types_result = $conn->query($flag_types_query);
+$flag_types = $flag_types_result->num_rows > 0 ? $flag_types_result->fetch_all(MYSQLI_ASSOC) : [];
 
 // Check if the form has been submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Retrieve and sanitize input values
     $date_filter = $_POST['date_filter'] ?? date("Y-m-d");
+    $time_filter = $_POST['time_filter'] ?? 'daily';
+    $flag_type_filter = $_POST['flag_type'] ?? '';
+    $view_filter = $_POST['view_filter'] ?? 'own';
 
-    // Query to fetch attendance data for the logged-in employee and the selected date
+    // Determine the date range based on the time filter
+    $start_date = $date_filter;
+    $end_date = $date_filter;
+
+    if ($time_filter === 'weekly') {
+        $start_date = date('Y-m-d', strtotime('last Sunday', strtotime($date_filter)));
+        $end_date = date('Y-m-d', strtotime('next Saturday', strtotime($date_filter)));
+    } elseif ($time_filter === 'monthly') {
+        $start_date = date('Y-m-01', strtotime($date_filter));
+        $end_date = date('Y-m-t', strtotime($date_filter));
+    } elseif ($time_filter === 'yearly') {
+        $start_date = date('Y-01-01', strtotime($date_filter));
+        $end_date = date('Y-12-31', strtotime($date_filter));
+    }
+
+    // Start constructing the query
     $query = "SELECT er.first_name, er.last_name, eaf.attendance_date, eaf.attendance_status, ft.flag_type
               FROM employee_attendance_flag AS eaf
               LEFT JOIN flag_type AS ft ON eaf.flag_id = ft.flag_id
               LEFT JOIN employee_registration AS er ON eaf.employee_id = er.employee_id
-              WHERE eaf.employee_id = ? AND DATE(eaf.attendance_date) = ?
-              ORDER BY eaf.attendance_date ASC";
+              WHERE eaf.attendance_date BETWEEN ? AND ?";
 
+    // Array to hold bind types and parameters
+    $bind_types = "ss"; // Start with date parameters
+    $bind_params = [$start_date, $end_date];
+
+    // Add filters based on `view_filter`
+    if ($view_filter === 'own') {
+        $query .= " AND eaf.employee_id = ?";
+        $bind_types .= "i";
+        $bind_params[] = $employee_id;
+    } elseif ($view_filter === 'department') {
+        // Add department filter from the employee_registration table
+        $query .= " AND er.department = (SELECT department FROM employee_registration WHERE employee_id = ?)";
+        $bind_types .= "i";
+        $bind_params[] = $employee_id; // Use the employee's ID to get the department
+    }
+
+    // Add flag type filter if specified
+    if ($flag_type_filter) {
+        $query .= " AND ft.flag_id = ?";
+        $bind_types .= "i";
+        $bind_params[] = $flag_type_filter;
+    }
+
+    $query .= " ORDER BY eaf.attendance_date ASC";
+
+    // Prepare the statement
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("is", $employee_id, $date_filter);
+    if ($stmt === false) {
+        die("Error preparing the statement: " . $conn->error);
+    }
+
+    // Bind parameters dynamically
+    $stmt->bind_param($bind_types, ...$bind_params);
+
+    // Execute the query
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -39,6 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $attendance_data = $result->num_rows > 0 ? $result->fetch_all(MYSQLI_ASSOC) : [];
 }
 ?>
+
 
 
 <!DOCTYPE html>
@@ -225,10 +284,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="content-wrapper">
         <!-- Search panel form -->
         <div class="search-panel">
-            <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
-                <label for="date_filter">Select Date:</label>
-                <input type="date" id="date_filter" name="date_filter" value="<?php echo htmlspecialchars($date_filter); ?>" required>
-                <button type="submit">Search</button>
+            <form method="POST" action="">
+                <label for="date_filter">Date:</label>
+                <input type="date" id="date_filter" name="date_filter" value="<?php echo $date_filter; ?>">
+
+                <label for="time_filter">Time Filter:</label>
+                <select id="time_filter" name="time_filter">
+                    <option value="daily" <?php echo $time_filter === 'daily' ? 'selected' : ''; ?>>Daily</option>
+                    <option value="weekly" <?php echo $time_filter === 'weekly' ? 'selected' : ''; ?>>Weekly</option>
+                    <option value="monthly" <?php echo $time_filter === 'monthly' ? 'selected' : ''; ?>>Monthly</option>
+                    <option value="yearly" <?php echo $time_filter === 'yearly' ? 'selected' : ''; ?>>Yearly</option>
+                </select>
+
+                <label for="flag_type">Flag Type:</label>
+                <select id="flag_type" name="flag_type">
+                    <option value="">All</option>
+                    <?php foreach ($flag_types as $flag): ?>
+                        <option value="<?php echo $flag['flag_id']; ?>" <?php echo $flag_type_filter == $flag['flag_id'] ? 'selected' : ''; ?>>
+                            <?php echo $flag['flag_type']; ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+
+                <button type="submit">Filter</button>
             </form>
         </div>
 

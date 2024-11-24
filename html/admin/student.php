@@ -178,29 +178,6 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                             </li>
                         </ul>
                     </li> -->
-                    <li class="menu-item">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-printer"></i>
-                            <div data-i18n="Analytics">Print</div>
-                         </a>
-                        <ul class="menu-sub">
-                            <li class="menu-item">
-                                <a href="print/print_flag.php" class="menu-link">
-                                    <div data-i18n="Analytics">Flag Ceremony of Employee</div>
-                                </a>
-                            </li>
-                            <li class="menu-item">
-                                <a href="print/print_flag_student.php" class="menu-link">
-                                    <div data-i18n="Analytics">Flag Ceremony of Student</div>
-                                </a>
-                            </li>
-                            <li class="menu-item">
-                                <a href="print/print_gate.php" class="menu-link">
-                                    <div data-i18n="Analytics">Gate Marking Record</div>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
                 </ul>
             </aside>
             <!-- / Menu -->
@@ -229,7 +206,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li>
-                                        <a class="dropdown-item" href="admin_profile.php">
+                                        <a class="dropdown-item" href="#">
                                             <div class="d-flex">
                                                 <div class="flex-shrink-0 me-3">
                                                     <div class="avatar avatar-online">
@@ -241,6 +218,40 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                                                     <small class="text-muted">Admin</small>
                                                 </div>
                                             </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="admin_profile.php">
+                                            <i class="bx bx-user me-2"></i><span>My Profile</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="bx bx-cog me-2"></i><span>Settings</span>
+                                        </a>
+                                    </li>
+                                    <li class="dropdown">
+                                        <div class="dropdown-item d-flex align-items-center">
+                                            <i class="bx bx-printer me-2"></i>
+                                            <select id="print-options" class="form-select" onchange="handlePrintRedirect(this)">
+                                                <option value="" disabled selected>Select an option</option>
+                                                <option value="print/print_flag.php">Flag Ceremony Employee</option>
+                                                <option value="print/print_flag_student.php">Flag Ceremony Student</option>
+                                                <option value="print/print_gate.php">Gate Marking</option>
+                                            </select>
+                                        </div>
+                                    </li>
+                                    <script>
+                                        function handlePrintRedirect(select) {
+                                            const selectedValue = select.value;
+                                            if (selectedValue) {
+                                                window.location.href = selectedValue;
+                                            }
+                                        }
+                                    </script>
+                                    <li>
+                                        <a class="dropdown-item" href="qr/index.php">
+                                            <i class="bx bx-qr me-2"></i><span>Scan QR Code</span>
                                         </a>
                                     </li>
                                     <li>
@@ -298,15 +309,15 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                                                                     if (isset($result) && mysqli_num_rows($result) > 0) {
                                                                         while ($row = mysqli_fetch_array($result)) {
                                                                             echo "<tr>";
-                                                                            echo "<td>" . $row['student_id'] . "</td>";
-                                                                            echo "<td>" . $row['first_name'] . "</td>";
-                                                                            echo "<td>" . $row['last_name'] . "</td>";
-                                                                            echo "<td>" . $row['address'] . "</td>";
-                                                                            echo "<td>" . $row['gender'] . "</td>";
-                                                                            echo "<td>" . $row['email'] . "</td>";
-                                                                            echo "<td>" . $row['date_of_birth'] . "</td>";
-                                                                            echo "<td>" . $row['phone_number'] . "</td>";
-                                                                            echo "<td class='action-icons'>";
+                                                                            echo "<td class='text-nowrap'>" . $row['student_id'] . "</td>";
+                                                                            echo "<td class='text-nowrap'>" . $row['first_name'] . "</td>";
+                                                                            echo "<td class='text-nowrap'>" . $row['last_name'] . "</td>";
+                                                                            echo "<td class='text-nowrap'>" . $row['address'] . "</td>";
+                                                                            echo "<td class='text-nowrap'>" . $row['gender'] . "</td>";
+                                                                            echo "<td class='text-nowrap'>" . $row['email'] . "</td>";
+                                                                            echo "<td class='text-nowrap'>" . $row['date_of_birth'] . "</td>";
+                                                                            echo "<td class='text-nowrap'>" . $row['phone_number'] . "</td>";
+                                                                            echo "<td class='action-icons text-nowrap'>";
                                                                             echo "<a href='view_student_profile.php?student_id=" . $row['student_id'] . "'><i class='menu-icon tf-icons bx bx-show'></i></a>";
                                                                             echo "<a onclick=\"return confirm('Are you sure?')\" href='delete_student.php?student_id=" . $row['student_id'] . "'><i class='menu-icon tf-icons bx bx-trash'></i></a>";
                                                                             echo "</td>";

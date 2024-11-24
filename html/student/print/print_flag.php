@@ -10,29 +10,92 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'student') {
 // Include the database connection script
 require '../../config.php';
 
-// Get the logged-in student's ID
+// Get the logged-in student's ID and details
 $student_id = $_SESSION['student_id']; // Assuming student_id is stored in the session
+$student_details_query = "SELECT year_level, section FROM student_registration WHERE student_id = ?";
+$stmt = $conn->prepare($student_details_query);
+$stmt->bind_param("i", $student_id);
+$stmt->execute();
+$student_details = $stmt->get_result()->fetch_assoc();
+$student_year = $student_details['year_level'];
+$student_section = $student_details['section'];
 
 // Initialize variables
 $date_filter = date("Y-m-d"); // Default to today's date
+$time_filter = 'daily'; // Default time filter
+$flag_type_filter = ''; // No default for flag type
+$view_filter = 'own'; // Default to viewing only own data ('own' or 'classmates')
 $attendance_data = [];
+
+// Fetch all available flag types for the dropdown
+$flag_types_query = "SELECT flag_id, flag_type FROM flag_type";
+$flag_types_result = $conn->query($flag_types_query);
+$flag_types = $flag_types_result->num_rows > 0 ? $flag_types_result->fetch_all(MYSQLI_ASSOC) : [];
 
 // Check if the form has been submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Retrieve and sanitize input values
     $date_filter = $_POST['date_filter'] ?? date("Y-m-d");
+    $time_filter = $_POST['time_filter'] ?? 'daily';
+    $flag_type_filter = $_POST['flag_type'] ?? '';
+    $view_filter = $_POST['view_filter'] ?? 'own';
 
-    // Query to fetch attendance data for the logged-in student and the selected date
-    $query = "SELECT sr.first_name, sr.last_name, eaf.attendance_date, eaf.attendance_status, ft.flag_type
-            FROM student_attendance_flag AS eaf
-            LEFT JOIN flag_type AS ft ON eaf.flag_id = ft.flag_id
-            LEFT JOIN student_registration AS sr ON eaf.student_id = sr.student_id
-            WHERE eaf.student_id = ? AND DATE(eaf.attendance_date) = ?
-            ORDER BY eaf.attendance_date ASC";
+    // Determine the date range based on the time filter
+    $start_date = $date_filter;
+    $end_date = $date_filter;
 
+    if ($time_filter === 'weekly') {
+        $start_date = date('Y-m-d', strtotime('last Sunday', strtotime($date_filter)));
+        $end_date = date('Y-m-d', strtotime('next Saturday', strtotime($date_filter)));
+    } elseif ($time_filter === 'monthly') {
+        $start_date = date('Y-m-01', strtotime($date_filter));
+        $end_date = date('Y-m-t', strtotime($date_filter));
+    } elseif ($time_filter === 'yearly') {
+        $start_date = date('Y-01-01', strtotime($date_filter));
+        $end_date = date('Y-12-31', strtotime($date_filter));
+    }
 
+    // Base query
+    $query = "SELECT er.first_name, er.last_name, eaf.attendance_date, eaf.attendance_status, ft.flag_type
+              FROM student_attendance_flag AS eaf
+              LEFT JOIN flag_type AS ft ON eaf.flag_id = ft.flag_id
+              LEFT JOIN student_registration AS er ON eaf.student_id = er.student_id
+              WHERE eaf.attendance_date BETWEEN ? AND ?";
+
+    // Array to hold bind types and parameters
+    $bind_types = "ss"; // Start with two date parameters
+    $bind_params = [$start_date, $end_date];
+
+    // Add filters based on user input
+    if ($view_filter === 'own') {
+        $query .= " AND eaf.student_id = ?";
+        $bind_types .= "i";
+        $bind_params[] = $student_id;
+    } elseif ($view_filter === 'classmates') {
+        $query .= " AND er.year_level = ? AND er.section = ?";
+        $bind_types .= "ss";
+        $bind_params[] = $student_year;
+        $bind_params[] = $student_section;
+    }
+
+    if ($flag_type_filter) {
+        $query .= " AND ft.flag_id = ?";
+        $bind_types .= "i";
+        $bind_params[] = $flag_type_filter;
+    }
+
+    $query .= " ORDER BY eaf.attendance_date ASC";
+
+    // Prepare the statement
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("is", $student_id, $date_filter);
+    if ($stmt === false) {
+        die("Error preparing the statement: " . $conn->error);
+    }
+
+    // Use dynamic argument unpacking for bind_param
+    $stmt->bind_param($bind_types, ...$bind_params);
+
+    // Execute the query
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -41,6 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -48,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance Monitoring System - Print Attendance</title>
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="../../assets/img/favicon/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="../../../assets/img/avatars/logo.png"/>
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <!-- Icons -->
@@ -228,7 +292,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
                 <label for="date_filter">Select Date:</label>
                 <input type="date" id="date_filter" name="date_filter" value="<?php echo htmlspecialchars($date_filter); ?>" required>
-                <button type="submit">Search</button>
+
+                <label for="time_filter">Filter By:</label>
+                <select id="time_filter" name="time_filter">
+                    <option value="daily" <?php echo $time_filter === 'daily' ? 'selected' : ''; ?>>Daily</option>
+                    <option value="weekly" <?php echo $time_filter === 'weekly' ? 'selected' : ''; ?>>Weekly</option>
+                    <option value="monthly" <?php echo $time_filter === 'monthly' ? 'selected' : ''; ?>>Monthly</option>
+                    <option value="yearly" <?php echo $time_filter === 'yearly' ? 'selected' : ''; ?>>Yearly</option>
+                </select>
+
+                <label for="flag_type">Flag Type:</label>
+                <select id="flag_type" name="flag_type">
+                    <option value="">All</option>
+                    <?php foreach ($flag_types as $flag) : ?>
+                        <option value="<?php echo $flag['flag_id']; ?>" <?php echo $flag_type_filter == $flag['flag_id'] ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($flag['flag_type']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+
+                <label for="view_filter">View:</label>
+                <select id="view_filter" name="view_filter">
+                    <option value="own" <?php echo $view_filter === 'own' ? 'selected' : ''; ?>>Your Information</option>
+                    <option value="classmates" <?php echo $view_filter === 'classmates' ? 'selected' : ''; ?>>Year & Section</option>
+                </select>
+
+                <button type="submit">Filter</button>
             </form>
         </div>
 

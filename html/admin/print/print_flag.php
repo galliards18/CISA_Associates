@@ -309,7 +309,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label for="flag_type">Flag Type:</label>
                 <select id="flag_type" name="flag_type">
                     <option value="">All</option>
-                    <option value="Flag Ceremony" <?php echo ($flag_type == 'Flag Ceremony') ? 'selected' : ''; ?>>Flag Raising</option>
+                    <option value="Flag Raising" <?php echo ($flag_type == 'Flag Raising') ? 'selected' : ''; ?>>Flag Raising</option>
                     <option value="Flag Retreat" <?php echo ($flag_type == 'Flag Retreat') ? 'selected' : ''; ?>>Flag Retreat</option>
                 </select>
                 <!-- First name filter -->
@@ -323,12 +323,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
         </div>
         
-        <div class="mb-1 mt-2">
+        <!-- <div class="mb-1 mt-2">
             <center>
             <h4>Attendance Flag Data</h4>
             <p>Filter: <?php echo ucfirst($filter_type ?? "daily"); ?> | Selected Date: <?php echo htmlspecialchars($date_filter); ?></p>
         </center>
-        </div>
+        </div> -->
 
         <div class="table-container">
             <?php if (!empty($attendance_data)) : ?>

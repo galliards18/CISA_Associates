@@ -225,19 +225,6 @@ if ($stmt) {
                             </li>
                         </ul>
                     </li>
-                    <li class="menu-item">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-printer"></i>
-                            <div data-i18n="Analytics">Print</div>
-                         </a>
-                        <ul class="menu-sub">
-                            <li class="menu-item">
-                                <a href="print/print_flag.php" class="menu-link">
-                                    <div data-i18n="Analytics">Flag Ceremony of Student</div>
-                                </a>
-                            </li>                        
-                        </ul>
-                    </li>
                 </ul>
             </aside>
             <!-- / Menu -->
@@ -266,7 +253,7 @@ if ($stmt) {
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li>
-                                        <a class="dropdown-item" href="student.php">
+                                        <a class="dropdown-item" href="#">
                                             <div class="d-flex">
                                                 <div class="flex-shrink-0 me-3">
                                                     <div class="avatar avatar-online">
@@ -278,6 +265,38 @@ if ($stmt) {
                                                     <small class="text-muted"><?php echo isset($row['first_name']) ? htmlspecialchars($row['first_name']) : ''; ?><br><?php echo isset($row['last_name']) ? htmlspecialchars($row['last_name']) : ''; ?></small>
                                                 </div>
                                             </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="student.php">
+                                            <i class="bx bx-user me-2"></i><span>My Profile</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="bx bx-cog me-2"></i><span>Settings</span>
+                                        </a>
+                                    </li>
+                                    <li class="dropdown">
+                                        <div class="dropdown-item d-flex align-items-center">
+                                            <i class="bx bx-printer me-2"></i> 
+                                            <select id="print-options" class="form-select" onchange="handlePrintRedirect(this)">
+                                                <option value="" disabled selected>Select an option</option>
+                                                <option value="print/print_flag.php">Flag Ceremony</option>
+                                            </select>
+                                        </div>
+                                    </li>
+                                    <script>
+                                        function handlePrintRedirect(select) {
+                                            const selectedValue = select.value;
+                                            if (selectedValue) {
+                                                window.location.href = selectedValue;
+                                            }
+                                        }
+                                    </script>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="bx bx-qr me-2"></i><span>OTQRC</span>
                                         </a>
                                     </li>
                                     <li>
@@ -315,7 +334,16 @@ if ($stmt) {
                                         <div class="col-lg-10">
                                             <div class="container-xxl flex-grow-1 container-p-y">
                                                 <div class="row">
-                                                    <h2>Student Attendance: Flag Ceremony</h2>
+                                                <h1>Employee Attendance: Flag Ceremony 
+                                                    <div class="dropdown d-inline">
+                                                        <button class="btn btn-link text-decoration-none p-0" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            <i class="bx bx-printer"></i>
+                                                        </button>
+                                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                            <li><a class="dropdown-item" href="print/print_flag.php">Print Class Record</a></li>
+                                                        </ul>
+                                                    </div>
+                                                </h1>
                                                     <div class="col-lg-12 mb-4 order-0">
                                                         <?php if ($is_assigned == 1) : ?>
                                                             <div class="centered-button mb-3 mt-3">

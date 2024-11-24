@@ -169,19 +169,6 @@ if (isset($_SESSION['student_id'])) {
                             </li>
                         </ul>
                     </li>
-                    <li class="menu-item">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-printer"></i>
-                            <div data-i18n="Analytics">Print</div>
-                         </a>
-                        <ul class="menu-sub">
-                            <li class="menu-item">
-                                <a href="print/print_flag.php" class="menu-link">
-                                    <div data-i18n="Analytics">Flag Ceremony of Student</div>
-                                </a>
-                            </li>                        
-                        </ul>
-                    </li>
                 </ul>
             </aside>
             <!-- / Menu -->
@@ -210,7 +197,7 @@ if (isset($_SESSION['student_id'])) {
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li>
-                                        <a class="dropdown-item" href="student.php">
+                                        <a class="dropdown-item" href="#">
                                             <div class="d-flex">
                                                 <div class="flex-shrink-0 me-3">
                                                     <div class="avatar avatar-online">
@@ -222,6 +209,38 @@ if (isset($_SESSION['student_id'])) {
                                                     <small class="text-muted"><?php echo $first_name; ?><br><?php echo $last_name; ?></small>
                                                 </div>
                                             </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="student.php">
+                                            <i class="bx bx-user me-2"></i><span>My Profile</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="bx bx-cog me-2"></i><span>Settings</span>
+                                        </a>
+                                    </li>
+                                    <li class="dropdown">
+                                        <div class="dropdown-item d-flex align-items-center">
+                                            <i class="bx bx-printer me-2"></i> 
+                                            <select id="print-options" class="form-select" onchange="handlePrintRedirect(this)">
+                                                <option value="" disabled selected>Select an option</option>
+                                                <option value="print/print_flag.php">Flag Ceremony</option>
+                                            </select>
+                                        </div>
+                                    </li>
+                                    <script>
+                                        function handlePrintRedirect(select) {
+                                            const selectedValue = select.value;
+                                            if (selectedValue) {
+                                                window.location.href = selectedValue;
+                                            }
+                                        }
+                                    </script>
+                                    <li>
+                                        <a class="dropdown-item" href="generate_qr.php">
+                                            <i class="bx bx-qr me-2"></i><span>OTQRC</span>
                                         </a>
                                     </li>
                                     <li>
