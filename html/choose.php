@@ -1,85 +1,61 @@
 <?php
 session_start();
-
-// Include configuration file for database connection
 require_once('config.php');
 
-// Initialize variables to store user input
-$email = $password = $role = "";
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
-// Function to sanitize input
 function sanitize_input($data) {
-    $data = trim($data);
-    $data = stripslashes($data);
-    $data = htmlspecialchars($data);
-    return $data;
+    return htmlspecialchars(stripslashes(trim($data)));
 }
 
-// Check if form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Sanitize and store user input
     $email = sanitize_input($_POST["email"]);
     $password = sanitize_input($_POST["password"]);
-    $role = sanitize_input($_POST["role"]);  // Get the selected role (Employee or Student)
+    $role = sanitize_input($_POST["role"]);
 
-    // Determine the SQL query based on the role
-    if ($role == 'employee') {
-        // SQL query to fetch employee details based on email
-        $sql = "SELECT * FROM employee_registration WHERE email = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        if ($result->num_rows == 1) {
-            $row = $result->fetch_assoc();
-            if (password_verify($password, $row['password'])) {
-                $_SESSION['employee_id'] = $row['employee_id'];
-
-                if ($row['is_admin'] == 1) {
-                    $_SESSION['user_role'] = 'admin';
-                    echo "<script>Swal.fire('Success', 'Admin login successful. Redirecting...', 'success');</script>";
-                    header("refresh:2;url=admin/dashboard.php");
-                    exit();
-                } else {
-                    $_SESSION['user_role'] = 'employee';
-                    echo "<script>Swal.fire('Success', 'Employee login successful. Redirecting...', 'success');</script>";
-                    header("refresh:2;url=employee/dashboard.php");
-                    exit();
-                }
-            } else {
-                echo "<script>Swal.fire('Error', 'Invalid password. Please try again.', 'error');</script>";
-            }
-        } else {
-            echo "<script>Swal.fire('Error', 'Invalid email. Please try again.', 'error');</script>";
-        }
-    } elseif ($role == 'student') {
-        // SQL query to fetch student details based on email
-        $sql = "SELECT * FROM student_registration WHERE email = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        if ($result->num_rows == 1) {
-            $row = $result->fetch_assoc();
-            if (password_verify($password, $row['password'])) {
-                $_SESSION['student_id'] = $row['student_id'];
-                $_SESSION['user_role'] = 'student';
-                echo "<script>Swal.fire('Success', 'Student login successful. Redirecting...', 'success');</script>";
-                header("refresh:2;url=student/dashboard.php");
-                exit();
-            } else {
-                echo "<script>Swal.fire('Error', 'Invalid password. Please try again.', 'error');</script>";
-            }
-        } else {
-            echo "<script>Swal.fire('Error', 'Invalid email. Please try again.', 'error');</script>";
-        }
-    } else {
-        echo "<script>Swal.fire('Error', 'Please select a valid role.', 'error');</script>";
+    if (!$email || !$password || !$role) {
+        echo "<script>Swal.fire('Error', 'All fields are required.', 'error');</script>";
+        exit();
     }
 
-    // Close statement and connection
+    // Modify the query to select all users based on the role
+    $sql = ($role == 'employee') 
+        ? "SELECT * FROM employee_registration"  // Fetch all employees
+        : "SELECT * FROM student_registration";   // Fetch all students
+
+    $stmt = $conn->prepare($sql);
+
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            // Loop through all rows and process them
+            while ($row = $result->fetch_assoc()) {
+                // Process the row
+                // Check if email and password match for each record
+                if ($row['email'] == $email && password_verify($password, $row['password'])) {
+                    if ($role == 'employee') {
+                        $_SESSION['employee_id'] = $row['employee_id'];
+                        $_SESSION['user_role'] = $row['is_admin'] ? 'admin' : 'employee';
+                        $redirect = $row['is_admin'] ? 'admin/dashboard.php' : 'employee/dashboard.php';
+                    } else {
+                        $_SESSION['student_id'] = $row['student_id'];
+                        $_SESSION['user_role'] = 'student';
+                        $redirect = 'student/dashboard.php';
+                    }
+                    echo "<script>Swal.fire('Success', 'Login successful. Redirecting...', 'success');</script>";
+                    header("refresh:2;url=$redirect");
+                    exit();
+                }
+            }
+            // If no match is found, show error
+            echo "<script>Swal.fire('Error', 'Invalid email or password.', 'error');</script>";
+        } else {
+            echo "<script>Swal.fire('Error', 'No records found.', 'error');</script>";
+        }
+    } else {
+        echo "<script>Swal.fire('Error', 'Query execution failed.', 'error');</script>";
+    }
     $stmt->close();
     $conn->close();
 }
