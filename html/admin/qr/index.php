@@ -3,22 +3,29 @@ session_start();
 
 // Check if user is not logged in or is not an admin
 if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
-    header("Location: ../choose.php"); // Redirect to login page if not logged in as admin
+    header("Location: ../../choose.php"); // Redirect to login page if not logged in as admin
     exit();
 }
 
 // Include the database connection script
 require '../../config.php';
 
-date_default_timezone_set('Asia/Manila'); // Set to your local timezone
+// Set to your local timezone
+date_default_timezone_set('Asia/Manila');
 
-// Fetch today's logs from employee_qr_log
+// Pagination variables
+$limit = 10; // Records per page
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Get the current page from query string
+$offset = ($page - 1) * $limit;
+
+// Fetch today's logs from employee_attendance_gate
 $today = date('Y-m-d');
 $logSql = "SELECT employee_registration.first_name, employee_registration.last_name, 
-                  employee_qr_log.entry_type, employee_qr_log.log_time
-           FROM employee_qr_log
-           JOIN employee_registration ON employee_qr_log.employee_id = employee_registration.employee_id
-           WHERE DATE(employee_qr_log.log_time) = ?";
+                  employee_attendance_gate.entry_type, employee_attendance_gate.entry_time, employee_attendance_gate.description
+           FROM employee_attendance_gate
+           JOIN employee_registration ON employee_attendance_gate.employee_id = employee_registration.employee_id
+           WHERE DATE(employee_attendance_gate.entry_time) = ?
+           LIMIT $limit OFFSET $offset";
 $logStmt = $conn->prepare($logSql);
 $logStmt->bind_param("s", $today);
 $logStmt->execute();
@@ -30,16 +37,26 @@ while ($logRow = $logResult->fetch_assoc()) {
     $logs[] = [
         'employee_name' => $logRow['first_name'] . ' ' . $logRow['last_name'],
         'entry_type' => $logRow['entry_type'],
-        'log_time' => $logRow['log_time']
+        'entry_time' => $logRow['entry_time'],
+        'description' => $logRow['description']
     ];
 }
+
+// Get the total number of logs for pagination
+$totalSql = "SELECT COUNT(*) FROM employee_attendance_gate WHERE DATE(entry_time) = ?";
+$totalStmt = $conn->prepare($totalSql);
+$totalStmt->bind_param("s", $today);
+$totalStmt->execute();
+$totalResult = $totalStmt->get_result();
+$totalRows = $totalResult->fetch_row()[0];
+$totalPages = ceil($totalRows / $limit);
 
 $logStmt->close();
 $conn->close();
 ?>
 
 <!DOCTYPE html>
-<html lang="en" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../../assets/" data-template="vertical-menu-template-free">
+<html lang="en" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../../../assets/" data-template="vertical-menu-template-free">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
@@ -49,11 +66,8 @@ $conn->close();
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="../../../assets/img/avatars/logo.png"/>
 
-    <!-- SweetAlert CSS -->
+    <!-- SweetAlert2 CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-
-    <!-- SweetAlert JS -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- FullCalendar JS -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
@@ -62,11 +76,9 @@ $conn->close();
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" />
-
-    <!-- Link Poppins font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Icons. Uncomment required icon fonts -->
+    <!-- Icons -->
     <link rel="stylesheet" href="../../../assets/vendor/fonts/boxicons.css" />
 
     <!-- Core CSS -->
@@ -82,30 +94,35 @@ $conn->close();
 
     <!-- Helpers -->
     <script src="../../../assets/vendor/js/helpers.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
-    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
-    <script src="../../../assets/js/config.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <!-- Include Instascan library -->
+    <!-- Instascan library -->
     <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Include jQuery -->
+
+    <!-- Config -->
     <script src="../../../assets/js/config.js"></script>
 
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
 </head>
 <body>
-    <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
-            <!-- Menu -->
+            <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+                integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+                crossorigin="anonymous"></script>
+                <!-- Menu -->
             <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
                 <div class="app-brand demo" style="padding: 70px;">
                     <div class="logo">
                         <img style="border-radius: 500px; box-shadow: 2px 2px 20px #00008b; margin-top: 30px; margin-bottom: 5px;" src="../../../assets/img/avatars/logo.png" width="100" height="100" alt="">
                         <b>
-                            <p style="font-size: 20px; color: blue; text-shadow: 2px 2px 50px #00008b; padding-left: 18px;">S L S U</p>
+                            <p style="font-size: 20px; color: blue; text-shadow: 2px 2px 50px #00008b; padding-left: 10px;">Admin</p>
                         </b>
                     </div>
                     <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -127,13 +144,13 @@ $conn->close();
                         </a>
                         <ul class="menu-sub">
                             <li class="menu-item">
-                                <a href="../student.php" class="menu-link">
-                                    <div data-i18n="Analytics">Student</div>
+                                <a href="../employee.php" class="menu-link">
+                                    <div data-i18n="Analytics">Employee</div>
                                 </a>
                             </li>
                             <li class="menu-item">
-                                <a href="../employee.php" class="menu-link">
-                                    <div data-i18n="Analytics">Employee</div>
+                                <a href="../student.php" class="menu-link">
+                                    <div data-i18n="Analytics">Student</div>
                                 </a>
                             </li>
                         </ul>
@@ -275,31 +292,16 @@ $conn->close();
                                         <h1 class="mb-0">QR Code Scanner</h1>
                                     </div>
                                     <div class="card-body">
-                                        <!-- Camera Preview & QR Scan Area -->
                                         <div class="row">
-                                            <div class="col-md-6">
+                                            <div class="col-md-12">
                                                 <video id="preview" width="100%" autoplay class="rounded border shadow-sm"></video>
                                             </div>
-                                            <div class="col-md-6">
+                                            <div class="">
                                                 <label for="text" class="form-label">Scan QR Code</label>
-                                                <input type="text" name="text" id="text" readonly placeholder="Scan QR Code" class="form-control shadow-sm">
-
-                                                <!-- Alert Message -->
-                                                <div id="alert-message" class="alert mt-3" style="display: none;"></div>
-
-                                                <!-- Buttons for QR Scan -->
-                                                <div id="entry-buttons" class="mt-3" style="display: none;">
-                                                    <button class="btn btn-success shadow-sm rounded-3 w-100 mb-2 hover-shadow" id="in-button">
-                                                        <i class="fas fa-sign-in-alt me-2"></i> In
-                                                    </button>
-                                                    <button class="btn btn-danger shadow-sm rounded-3 w-100 mb-2 hover-shadow" id="out-button">
-                                                        <i class="fas fa-sign-out-alt me-2"></i> Out
-                                                    </button>
-                                                </div>
+                                                <div id="scan-status"></div>
                                             </div>
                                         </div>
 
-                                        <!-- Display QR Log Data -->
                                         <div class="mt-5">
                                             <h4>Today's QR Scan Logs</h4>
                                             <table class="table table-bordered table-striped">
@@ -316,7 +318,7 @@ $conn->close();
                                                             <tr>
                                                                 <td><?php echo htmlspecialchars($log['employee_name']); ?></td>
                                                                 <td><?php echo htmlspecialchars($log['entry_type']); ?></td>
-                                                                <td><?php echo htmlspecialchars($log['log_time']); ?></td>
+                                                                <td><?php echo htmlspecialchars($log['entry_time']); ?></td>
                                                             </tr>
                                                         <?php endforeach; ?>
                                                     <?php else: ?>
@@ -326,13 +328,28 @@ $conn->close();
                                                     <?php endif; ?>
                                                 </tbody>
                                             </table>
+                                            <nav aria-label="Page navigation" class="mt-3">
+                                                <ul class="pagination justify-content-center">
+                                                    <li class="page-item <?php if ($page <= 1) echo 'disabled'; ?>">
+                                                        <a class="page-link" href="?page=<?php echo $page - 1; ?>" tabindex="-1">Previous</a>
+                                                    </li>
+                                                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                                                        <li class="page-item <?php if ($page == $i) echo 'active'; ?>">
+                                                            <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                                                        </li>
+                                                    <?php endfor; ?>
+                                                    <li class="page-item <?php if ($page >= $totalPages) echo 'disabled'; ?>">
+                                                        <a class="page-link" href="?page=<?php echo $page + 1; ?>">Next</a>
+                                                    </li>
+                                                </ul>
+                                            </nav>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <!-- / Content -->                   
+                <!-- / Content -->                   
                 </div>
                 <!-- / Content wrapper -->
 
@@ -376,108 +393,104 @@ $conn->close();
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
-    // Initialize the scanner
-    let scanner = new Instascan.Scanner({ video: document.getElementById('preview') });
+        // Initialize the scanner
+        let scanner = new Instascan.Scanner({ video: document.getElementById('preview') });
 
-    // Get available cameras
-    Instascan.Camera.getCameras().then(function(cameras) {
-        if (cameras.length > 0) {
-            scanner.start(cameras[0]); // Start the first available camera
-        } else {
-            alert('No cameras found.');
-        }
-    }).catch(function(e) {
-        console.error(e);
-    });
-
-    // Listener for scanned QR codes
-    scanner.addListener('scan', function(content) {
-        // Send the scanned employee ID to the server to fetch employee name
-        $.ajax({
-            url: 'process_qr.php', // Path to your PHP script
-            type: 'POST',
-            data: { text: content },
-            success: function(response) {
-                try {
-                    // Parse the response as JSON
-                    const data = JSON.parse(response);
-
-                    // Check if the employee data was fetched successfully
-                    if (data.success) {
-                        // Display the employee's name in the input field
-                        document.getElementById('text').value = data.first_name + ' ' + data.last_name;
-
-                        // Show the "in" and "out" buttons
-                        $('#entry-buttons').show();
-
-                        // Handle "in" button click
-                        $('#in-button').on('click', function() {
-                            submitEntry(content, 'in');
-                        });
-
-                        // Handle "out" button click
-                        $('#out-button').on('click', function() {
-                            submitEntry(content, 'out');
-                        });
-
-                    } else {
-                        // Display error message if employee is not found
-                        let alertBox = document.getElementById('alert-message');
-                        alertBox.innerHTML = data.message;
-                        alertBox.className = 'alert alert-danger'; // Error style
-                        alertBox.style.display = 'block';
-                    }
-                } catch (error) {
-                    console.error("Error processing response: ", response);
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error("Error: " + error);
+        // Get available cameras
+        Instascan.Camera.getCameras().then(function(cameras) {
+            if (cameras.length > 0) {
+                // Start the first available camera
+                scanner.start(cameras[0]);
+            } else {
+                // Display error message if no cameras are found
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'No cameras found.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
             }
+        }).catch(function(e) {
+            console.error(e);
         });
-    });
 
-    // Function to submit entry type to the server
-    function submitEntry(employeeId, entryType) {
-        // Send QR code data and entry type to the server via AJAX
-        $.ajax({
-            url: 'process_qr.php', // Path to your PHP script
-            type: 'POST',
-            data: { text: employeeId, entry_type: entryType },
-            success: function(response) {
-                try {
-                    // Parse the response as JSON
-                    const data = JSON.parse(response);
+        // Listen for scan events
+        scanner.addListener('scan', function(content) {
+            // Show loading indicator
+            document.getElementById('scan-status').innerHTML = 
+                '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Scanning...';
 
-                    // Show success or error message
-                    let alertBox = document.getElementById('alert-message');
-                    if (data.success) {
-                        alertBox.innerHTML = data.message;
-                        alertBox.className = 'alert alert-success'; // Success style
-                    } else {
-                        alertBox.innerHTML = data.message;
-                        alertBox.className = 'alert alert-danger'; // Error style
+            // Perform AJAX request to process the scanned QR code
+            $.ajax({
+                url: 'process_qr.php', // Path to your PHP script
+                type: 'POST',
+                data: { text: content },
+                success: function(response) {
+                    try {
+                        // Log the response for debugging
+                        console.log('Response:', response);
+
+                        const data = JSON.parse(response);
+
+                        // Hide loading indicator
+                        document.getElementById('scan-status').innerHTML = '';
+
+                        // Wait for 2 seconds before showing SweetAlert
+                        setTimeout(() => {
+                            if (data.success) {
+                                // Display SweetAlert success message
+                                Swal.fire({
+                                    title: 'Success!',
+                                    text: data.message,
+                                    icon: 'success',
+                                    confirmButtonText: 'OK'
+                                }).then(() => {
+                                    // Reload the page after confirmation
+                                    location.reload(); // Refresh the page
+                                });
+                            } else {
+                                // Display SweetAlert error message
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: data.message,
+                                    icon: 'error',
+                                    confirmButtonText: 'OK'
+                                });
+                            }
+                        }, 1000);
+
+                    } catch (error) {
+                        console.error("Error processing response:", error);
+
+                        // Hide the loading indicator in case of error
+                        document.getElementById('scan-status').innerHTML = '';
+
+                        // Show SweetAlert error
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'An error occurred while processing the response.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
                     }
-                    alertBox.style.display = 'block';
+                },
+                error: function(xhr, status, error) {
+                    // Hide the loading indicator if an error occurs
+                    document.getElementById('scan-status').innerHTML = '';
 
-                    // Hide the entry buttons after submission
-                    $('#entry-buttons').hide();
-
-                    // Reload the page after 3 seconds (optional)
-                    setTimeout(function() {
-                        location.reload();
-                    }, 3000);
-                } catch (error) {
-                    console.error("Error processing log response: ", response);
+                    // Show SweetAlert error
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'There was an issue with the QR code processing.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
                 }
-            },
-            error: function(xhr, status, error) {
-                console.error("Error: " + error);
-            }
+            });
         });
-    }
-</script>
-
+    </script>
 </body>
 </html>

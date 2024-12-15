@@ -1,3 +1,20 @@
+<script
+    src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+    crossorigin="anonymous"></script>
+<script>
+    $(document).ready(function() {
+        // Set interval to auto-update content
+        setInterval(function() {
+            $("#test").load("data.txt", {
+                //
+            }, function() {
+                console.log("Comment updated automatically.");
+            });
+        }, 1000); // Update every 1 second
+    });
+</script>
+
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand demo" style="padding: 70px;">
         <div class="logo">
@@ -25,13 +42,13 @@
             </a>
             <ul class="menu-sub">
                 <li class="menu-item">
-                    <a href="student.php" class="menu-link">
-                        <div data-i18n="Analytics">Student</div>
+                    <a href="employee.php" class="menu-link">
+                        <div data-i18n="Analytics">Employee</div>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="employee.php" class="menu-link">
-                        <div data-i18n="Analytics">Employee</div>
+                    <a href="student.php" class="menu-link">
+                        <div data-i18n="Analytics">Student</div>
                     </a>
                 </li>
             </ul>

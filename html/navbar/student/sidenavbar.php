@@ -1,3 +1,20 @@
+<script
+    src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+    crossorigin="anonymous"></script>
+<script>
+    $(document).ready(function() {
+        // Set interval to auto-update content
+        setInterval(function() {
+            $("#test").load("data.txt", {
+                //
+            }, function() {
+                console.log("Comment updated automatically.");
+            });
+        }, 1000); // Update every 1 second
+    });
+</script>
+
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand demo" style="padding: 70px;">
         <div class="logo">

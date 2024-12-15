@@ -1,97 +1,98 @@
 <?php
 session_start();
 
-// Check if user is not logged in or is not an admin
+// Ensure no redirect happens before this point
 if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
-    header("Location: ../choose.php"); // Redirect to login page if not logged in as admin
+    header("Location: ../../choose.php");
     exit();
 }
 
 // Include the database connection script
 require '../../config.php';
 
-// Handle QR scan and logging
-if (isset($_POST['text'])) {
-    $employeeId = $_POST['text'];
-    $entryType = isset($_POST['entry_type']) ? $_POST['entry_type'] : '';
+// Initialize response variables
+$response = ['success' => false, 'message' => '']; // Default response
 
-    if (!empty($employeeId)) {
-        // Fetch employee details (name) using the employee ID
-        $sql = "SELECT first_name, last_name FROM employee_registration WHERE employee_id = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $employeeId);
+// Handle QR code scanning and attendance marking
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['text'])) {
+    // Sanitize the scanned QR code input
+    $employee_id = sanitize_input($_POST['text']);
+
+    // Check if the employee_id exists in the employee_registration table
+    $sql = "SELECT employee_id, first_name, last_name FROM employee_registration WHERE employee_id = ?";
+    if ($stmt = $conn->prepare($sql)) {
+        $stmt->bind_param("i", $employee_id);
         $stmt->execute();
         $result = $stmt->get_result();
-        $employee = $result->fetch_assoc();
 
-        if ($employee) {
-            // If entryType is provided, log the entry
-            if ($entryType) {
-                $logTime = date('Y-m-d H:i:s');
-                $logSql = "INSERT INTO employee_qr_log (employee_id, entry_type, log_time) VALUES (?, ?, ?)";
-                $logStmt = $conn->prepare($logSql);
-                $logStmt->bind_param("iss", $employeeId, $entryType, $logTime);
-                $logStmt->execute();
+        if ($result->num_rows > 0) {
+            // Employee exists, proceed with attendance marking
+            $employee = $result->fetch_assoc();
+            $first_name = $employee['first_name'];
+            $last_name = $employee['last_name'];
 
-                // Send success response
-                echo json_encode([
-                    'success' => true,
-                    'message' => "{$employee['first_name']} {$employee['last_name']} logged as {$entryType}."
-                ]);
+            // Check the last attendance entry for the employee
+            $sql = "SELECT entry_type FROM employee_attendance_gate WHERE employee_id = ? ORDER BY entry_time DESC LIMIT 1";
+            if ($stmt2 = $conn->prepare($sql)) {
+                $stmt2->bind_param("i", $employee_id);
+                $stmt2->execute();
+                $result2 = $stmt2->get_result();
+                $last_entry = $result2->fetch_assoc();
+
+                // Determine entry type (auto-toggle between 'in' and 'out')
+                $entry_type = 'in'; // Default to 'in'
+                if ($last_entry && $last_entry['entry_type'] == 'in') {
+                    $entry_type = 'out';
+                }
+
+                // Insert the new attendance record
+                $attendance_status = ($entry_type == 'in') ? 1 : 2; // 1 for marked_in, 2 for marked_out
+                $description = ($entry_type == 'in') ? 'Marked In via QR' : 'Marked Out via QR';
+
+                $sql = "INSERT INTO employee_attendance_gate (employee_id, entry_time, entry_type, description, attendance_status) 
+                        VALUES (?, NOW(), ?, ?, ?)";
+                if ($stmt3 = $conn->prepare($sql)) {
+                    $stmt3->bind_param("isss", $employee_id, $entry_type, $description, $attendance_status);
+                    if ($stmt3->execute()) {
+                        $response['success'] = true;
+                        $response['message'] = "Attendance for {$first_name} {$last_name} marked successfully: " . ucfirst($entry_type);
+                    } else {
+                        $response['message'] = "Error marking attendance. Please try again.";
+                    }
+                    $stmt3->close();
+                } else {
+                    $response['message'] = "Error preparing attendance insert statement.";
+                }
+
+                $stmt2->close();
             } else {
-                // If no entry type, return employee's name and ID for frontend
-                echo json_encode([
-                    'success' => true,
-                    'message' => "{$employee['first_name']} {$employee['last_name']}",
-                    'employee_id' => $employeeId,
-                    'first_name' => $employee['first_name'],
-                    'last_name' => $employee['last_name']
-                ]);
+                $response['message'] = "Error preparing last entry query.";
             }
+
         } else {
-            echo json_encode([
-                'success' => false,
-                'message' => 'Employee not found.'
-            ]);
+            // Employee ID does not exist in the employee_registration table
+            $response['message'] = "Invalid Employee ID. Please scan a valid employee QR code.";
         }
+
+        $stmt->close();
     } else {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Invalid QR code data.'
-        ]);
+        $response['message'] = "Error preparing employee select statement.";
     }
-
-    exit;
+} else {
+    $response['message'] = "No data received or invalid POST request.";
 }
 
-
-// Fetch today's logs
-$today = date('Y-m-d');
-$logSql = "SELECT employee_registration.first_name, employee_registration.last_name, 
-                  employee_qr_log.entry_type, employee_qr_log.log_time
-           FROM employee_qr_log
-           JOIN employee_registration ON employee_qr_log.employee_id = employee_registration.employee_id
-           WHERE DATE(employee_qr_log.log_time) = ?";
-$logStmt = $conn->prepare($logSql);
-$logStmt->bind_param("s", $today);
-$logStmt->execute();
-$logResult = $logStmt->get_result();
-
-// Prepare the logs array
-$logs = [];
-while ($logRow = $logResult->fetch_assoc()) {
-    $logs[] = [
-        'employee_name' => $logRow['first_name'] . ' ' . $logRow['last_name'],
-        'entry_type' => $logRow['entry_type'],
-        'log_time' => $logRow['log_time']
-    ];
+// Function to sanitize input data
+function sanitize_input($data) {
+    $data = trim($data);            // Remove leading/trailing whitespace
+    $data = stripslashes($data);    // Remove backslashes
+    $data = htmlspecialchars($data);// Convert special characters to HTML entities
+    return $data;
 }
-
-// Return logs as JSON
-echo json_encode($logs);
 
 // Close the database connection
-$logStmt->close();
-$stmt->close();
 $conn->close();
+
+// Return response as JSON
+echo json_encode($response);
 ?>

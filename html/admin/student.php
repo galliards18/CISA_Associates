@@ -15,6 +15,10 @@ function sanitize($data) {
 }
 
 $firstnameFilter = '';
+$itemsPerPage = 50;
+$totalItems = 0;
+$totalPages = 1;
+$current_page = 1;
 
 // Check if a search query is provided
 if ($_SERVER['REQUEST_METHOD'] == "GET") {
@@ -22,17 +26,48 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         $firstnameFilter = sanitize($_GET['firstname']);
     }
 
-    // Prepare the SQL query
+    // Prepare the SQL query to count total items
+    $sqlCountQuery = "SELECT COUNT(*) AS total FROM student_registration WHERE 1";
+
+    if (!empty($firstnameFilter)) {
+        // Search in both first and last names
+        $sqlCountQuery .= " AND (first_name LIKE '%$firstnameFilter%' OR last_name LIKE '%$firstnameFilter%')";
+    }
+
+    // Execute the count query
+    $countResult = mysqli_query($conn, $sqlCountQuery);
+    if ($countRow = mysqli_fetch_assoc($countResult)) {
+        $totalItems = $countRow['total'];
+    }
+
+    // Calculate total pages
+    $totalPages = ceil($totalItems / $itemsPerPage);
+
+    // Get current page from the URL, default to 1
+    if (isset($_GET['page']) && is_numeric($_GET['page'])) {
+        $current_page = (int)$_GET['page'];
+    }
+    if ($current_page < 1) {
+        $current_page = 1;
+    } elseif ($current_page > $totalPages) {
+        $current_page = $totalPages;
+    }
+
+    // Calculate offset
+    $offset = ($current_page - 1) * $itemsPerPage;
+
+    // Prepare the SQL query to fetch paginated data
     $sqlquery = "SELECT * FROM student_registration WHERE 1";
 
     if (!empty($firstnameFilter)) {
-        $sqlquery .= " AND first_name LIKE '%$firstnameFilter%'";
+        // Search in both first and last names
+        $sqlquery .= " AND (first_name LIKE '%$firstnameFilter%' OR last_name LIKE '%$firstnameFilter%')";
     }
 
-    // Execute the query and count the total items
-    if ($result = mysqli_query($conn, $sqlquery)) {
-        $totalItems = mysqli_num_rows($result);
-    }
+    $sqlquery .= " LIMIT $itemsPerPage OFFSET $offset";
+
+    // Execute the paginated query
+    $result = mysqli_query($conn, $sqlquery);
 }
 ?>
 
@@ -128,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                                                     <!-- Search -->
                                                     <form method="GET" action="student.php" class="mb-4">
                                                         <div class="input-group">
-                                                            <input type="text" class="form-control" name="firstname" placeholder="Search by First Name" value="<?php echo $firstnameFilter; ?>">
+                                                            <input type="text" class="form-control" name="firstname" placeholder="Search by First or Last Name" value="<?php echo $firstnameFilter; ?>">
                                                             <button class="btn btn-primary" type="submit">Search</button>
                                                         </div>
                                                     </form>
@@ -151,30 +186,55 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                                                             </thead>
                                                             <tbody>
                                                                 <?php
-                                                                    if (isset($result) && mysqli_num_rows($result) > 0) {
-                                                                        while ($row = mysqli_fetch_array($result)) {
-                                                                            echo "<tr>";
-                                                                            echo "<td class='text-nowrap'>" . $row['student_id'] . "</td>";
-                                                                            echo "<td class='text-nowrap'>" . $row['first_name'] . "</td>";
-                                                                            echo "<td class='text-nowrap'>" . $row['last_name'] . "</td>";
-                                                                            echo "<td class='text-nowrap'>" . $row['address'] . "</td>";
-                                                                            echo "<td class='text-nowrap'>" . $row['gender'] . "</td>";
-                                                                            echo "<td class='text-nowrap'>" . $row['email'] . "</td>";
-                                                                            echo "<td class='text-nowrap'>" . $row['date_of_birth'] . "</td>";
-                                                                            echo "<td class='text-nowrap'>" . $row['phone_number'] . "</td>";
-                                                                            echo "<td class='action-icons text-nowrap'>";
-                                                                            echo "<a href='view_student_profile.php?student_id=" . $row['student_id'] . "'><i class='menu-icon tf-icons bx bx-show'></i></a>";
-                                                                            echo "<a onclick=\"return confirm('Are you sure?')\" href='delete_student.php?student_id=" . $row['student_id'] . "'><i class='menu-icon tf-icons bx bx-trash'></i></a>";
-                                                                            echo "</td>";
-                                                                            echo "</tr>";
-                                                                        }
-                                                                    } else {
-                                                                        echo "<tr><td colspan='9'>No records found</td></tr>";
+                                                                $counter = 1; 
+                                                                if (isset($result) && mysqli_num_rows($result) > 0) {
+                                                                    while ($row = mysqli_fetch_array($result)) {
+                                                                        echo "<tr>";
+                                                                        echo "<td class='text-nowrap'>{$counter}</td>"; 
+                                                                        echo "<td class='text-nowrap'>" . $row['first_name'] . "</td>";
+                                                                        echo "<td class='text-nowrap'>" . $row['last_name'] . "</td>";
+                                                                        echo "<td class='text-nowrap'>" . $row['address'] . "</td>";
+                                                                        echo "<td class='text-nowrap'>" . $row['gender'] . "</td>";
+                                                                        echo "<td class='text-nowrap'>" . $row['email'] . "</td>";
+                                                                        echo "<td class='text-nowrap'>" . $row['date_of_birth'] . "</td>";
+                                                                        echo "<td class='text-nowrap'>" . $row['phone_number'] . "</td>";
+                                                                        echo "<td class='action-icons text-nowrap'>";
+                                                                        echo "<a href='view_student_profile.php?student_id=" . $row['student_id'] . "'><i class='menu-icon tf-icons bx bx-show'></i></a>";
+                                                                        echo "<a onclick=\"return confirm('Are you sure?')\" href='delete_student.php?student_id=" . $row['student_id'] . "'><i class='menu-icon tf-icons bx bx-trash'></i></a>";
+                                                                        echo "</td>";
+                                                                        echo "</tr>";
+                                                                        $counter++; 
                                                                     }
+                                                                } else {
+                                                                    echo "<tr><td colspan='9'>No records found</td></tr>";
+                                                                }
                                                                 ?>
                                                             </tbody>
                                                         </table>
                                                     </div>
+
+                                                    <!-- Pagination Links -->
+                                                    <nav class="mt-3">
+                                                        <ul class="pagination justify-content-center">
+                                                            <?php if ($current_page > 1): ?>
+                                                                <li class="page-item">
+                                                                    <a class="page-link" href="?page=<?php echo $current_page - 1; ?>&firstname=<?php echo $firstnameFilter; ?>">Previous</a>
+                                                                </li>
+                                                            <?php endif; ?>
+
+                                                            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                                                                <li class="page-item <?php echo $i == $current_page ? 'active' : ''; ?>">
+                                                                    <a class="page-link" href="?page=<?php echo $i; ?>&firstname=<?php echo $firstnameFilter; ?>"><?php echo $i; ?></a>
+                                                                </li>
+                                                            <?php endfor; ?>
+
+                                                            <?php if ($current_page < $totalPages): ?>
+                                                                <li class="page-item">
+                                                                    <a class="page-link" href="?page=<?php echo $current_page + 1; ?>&firstname=<?php echo $firstnameFilter; ?>">Next</a>
+                                                                </li>
+                                                            <?php endif; ?>
+                                                        </ul>
+                                                    </nav>
                                                     <div class="text-center mt-3">
                                                         <p>Total Employees Available: <?php echo isset($totalItems) ? $totalItems : '0'; ?></p>
                                                     </div>
